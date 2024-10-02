@@ -1,5 +1,6 @@
 package com.beotkkot.qtudy.domain.posts;
 
+import com.beotkkot.qtudy.domain.user.Users;
 import com.beotkkot.qtudy.dto.request.posts.PostsRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,8 +19,9 @@ public class Posts {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long postId;
 
-    @Column(nullable = false)
-    private Long kakaoId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "userId", nullable = false)
+    private Users user;
 
     @Column(nullable = false)
     private String title;
