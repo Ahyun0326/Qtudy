@@ -234,7 +234,7 @@ public class PostsService {
 
             // 관련된 hash tag -1
             List<String> tagNameList = Arrays.asList(post.get().getTag().split("\\s*,\\s*"));
-            List<Tags> tagList = tagRepo.findByNames(tagNameList);
+            List<Tags> tagList = tagRepo.findTagsByNameIn(tagNameList);
             for (Tags tag: tagList)
                 if (tag.getCount() > 0) tag.decreaseTagCount();
             postsRepo.delete(post.get());
