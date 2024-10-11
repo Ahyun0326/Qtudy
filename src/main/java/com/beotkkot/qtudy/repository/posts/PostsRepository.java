@@ -5,7 +5,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,8 +16,5 @@ public interface PostsRepository extends JpaRepository<Posts, Long> {
     @Query("SELECT p FROM Posts p WHERE p.title LIKE %:searchWord% OR p.content LIKE %:searchWord% OR p.tag LIKE %:searchWord%")
     Page<Posts> findBySearchWord(String searchWord, PageRequest pageRequest);
 
-    @Query("SELECT p FROM Posts p WHERE p.categoryId IN :categoryIds")
-    Page<Posts> findByCategoryIds(@Param("categoryIds")List<Long> categoryIds, PageRequest pageRequest);
-
-    Page<Posts> findByPostIdIn(List<Long> postIds, PageRequest pageRequest);
+    Page<Posts> findByCategoryIdIn(List<Long> categoryIds, PageRequest pageRequest);
 }

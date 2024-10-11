@@ -291,7 +291,7 @@ public class PostsService {
         int totalPages;
         try {
             PageRequest pageRequest = PageRequest.of(page, 12, Sort.by("createdAt").descending());
-            Page<Posts> posts = postsRepo.findByCategoryIds(categories, pageRequest);
+            Page<Posts> posts = postsRepo.findByCategoryIdIn(categories, pageRequest);
             totalPages = posts.getTotalPages();
 
             for (Posts post : posts.getContent()) {
