@@ -45,27 +45,25 @@ public class MyPageService {
     public ResponseEntity<? super MyInterestResponseDto> saveMyInterests(Long kakao_uid, List<Long> interests) {
 
         try {
-            if (userRepo.findByKakaoId(kakao_uid) == null) return MyInterestResponseDto.notExistedUser();
-            List<Interests> findInterests = interestsRepo.findAllByUserId(kakao_uid);
-            if ((interests.size() > 3) || (findInterests.size() > 0)) return MyInterestResponseDto.inputFailed();
+            Users user = userRepo.findByKakaoId(kakao_uid);
+            if (user == null) return MyInterestResponseDto.notExistedUser();
+            List<Interests> findInterests = interestsRepo.findByUser_UserId(user.getUserId());
+            if ((interests.size() > 3) || (!findInterests.isEmpty())) return MyInterestResponseDto.inputFailed();
 
-            for (Long categoryId : interests) {
+            for (Long catetoryId : interests) {
                 // 사용자의 관심사 3개를 interestsRepo에 저장한다.
                 // 1. CategoryRepo에서 사용자가 선택한 interests에 해당되는 관심사 조회
-                Optional<Category> category = categoryRepo.findById(categoryId);
-                if (!category.isPresent()) { // 존재하지 않는 카테고리일 경우
-                    return MyInterestResponseDto.databaseError();
-                }
-                // 2. 존재하는 카테고리이고, 사용자가 아직 관심사를 등록하지 않았다면, 해당하는 사용자의 관심사를 등록
-                Interests interest = new Interests(kakao_uid, categoryId);
+                Optional<Category> category = categoryRepo.findById(catetoryId);
+                // 존재하지 않는 카테고리일 경우
+                if (category.isEmpty()) return MyInterestResponseDto.databaseError();
+                Interests interest = new Interests(user, category.get());
                 interestsRepo.save(interest);
             }
         } catch (Exception exception) {
             log.info("error ", exception.getMessage());
             return MyInterestResponseDto.databaseError();
         }
-        MyInterestResponseDto responseDto = new MyInterestResponseDto();
-        return responseDto.success();
+        return MyInterestResponseDto.success();
     }
 
     // 관심 분야 목록 조회
@@ -73,10 +71,11 @@ public class MyPageService {
 
         List<Long> interestIds = new ArrayList<>();
         try {
-            if (userRepo.findByKakaoId(kakao_uid) == null) return GetMyInterestResponseDto.notExistedUser();
-            List<Interests> interests = interestsRepo.findAllByUserId(kakao_uid);
+            Users user = userRepo.findByKakaoId(kakao_uid);
+            if (user == null) return GetMyInterestResponseDto.notExistedUser();
+            List<Interests> interests = interestsRepo.findByUser_UserId(user.getUserId());
             for (Interests interest : interests) {
-                interestIds.add(interest.getCategoryId());
+                interestIds.add(interest.getCategory().getCategoryId());
             }
         } catch (Exception exception) {
             log.info("error ", exception.getMessage());
@@ -89,12 +88,10 @@ public class MyPageService {
     // 마이페이지에서 자신의 정보 조회 (관심사, 사용자 이름, 이메일, 사용자 프로필이미지)
     public ResponseEntity<? super GetMyPageInfoResponseDto> getMyPageInfo(Long kakao_uid, String email) {
 
-        Users user;
+        Users user = userRepo.findByKakaoId(kakao_uid);
         try {
             // 유저가 존재하지 않으면 에러
-            if (userRepo.findByKakaoId(kakao_uid) == null) return GetMyPageInfoResponseDto.notExistedUser();
-            // 존재하면 유저 가져오기
-            user = userRepo.findByKakaoId(kakao_uid);
+            if (user == null) return GetMyPageInfoResponseDto.notExistedUser();
         } catch (Exception exception) {
             log.info("error " + exception.getMessage());
             return GetMyPageInfoResponseDto.databaseError();
@@ -107,7 +104,7 @@ public class MyPageService {
         int totalPages;
         try {
             PageRequest pageRequest = PageRequest.of(page, 6, Sort.by("createdAt").descending());
-            Page<Posts> posts = postRepo.findAllByKakaoId(kakao_uid, pageRequest);
+            Page<Posts> posts = postRepo.findAllByUser_KakaoId(kakao_uid, pageRequest);
             totalPages = posts.getTotalPages();
             for (Posts post : posts.getContent())
                 postListItems.add(PostListItem.of(post));
@@ -116,23 +113,22 @@ public class MyPageService {
             return ResponseDto.databaseError();
         }
 
-        GetMyPageAllResponseDto responseDto = new GetMyPageAllResponseDto(postListItems, page, totalPages);
-        return responseDto.success(postListItems, page, totalPages);
+        return GetMyPageAllResponseDto.success(postListItems, page, totalPages);
     }
 
     public ResponseEntity<? super GetMyPageAllResponseDto> getAllScrapPost(Long kakao_uid, int page) {
 
         List<PostListItem> postListItems = new ArrayList<>();
+        Users user = userRepo.findByKakaoId(kakao_uid);
         int totalPages;
         try {
-            if (userRepo.findByKakaoId(kakao_uid) == null) return GetMyPageAllResponseDto.notExistedUser();
+            if (user == null) return GetMyPageAllResponseDto.notExistedUser();
 
-            PageRequest pageRequest = PageRequest.of(page, 6, Sort.by("createdAt").descending());
-            List<Long> postIdList = scrapRepo.findPostIdsByUserId(kakao_uid);
-            Page<Posts> posts = postRepo.findByPostIds(postIdList, pageRequest);
+            PageRequest pageRequest = PageRequest.of(page, 6);
+
+            // 유저 아이디 -> 스크랩(유저가 스크랩한 글 리스트) -> 포스트 -> 포스트 페이지네이션(스크랩한 시간대로 내림차순)
+            Page<Posts> posts = scrapRepo.findScrapPostsByUserId(user.getUserId(), pageRequest);
             totalPages = posts.getTotalPages();
-
-            if (posts == null) return GetMyPageAllResponseDto.notExistedPost();
 
             for (Posts post : posts.getContent())
                 postListItems.add(PostListItem.of(post));
@@ -141,33 +137,32 @@ public class MyPageService {
             return ResponseDto.databaseError();
         }
 
-        GetMyPageAllResponseDto responseDto = new GetMyPageAllResponseDto(postListItems, page, totalPages);
-        return responseDto.success(postListItems, page, totalPages);
+        return GetMyPageAllResponseDto.success(postListItems, page, totalPages);
     }
 
     @Transactional
     public ResponseEntity<? super MyInterestResponseDto> patchMyInterests(Long kakao_uid, List<Long> interests) {
         try {
-            if (userRepo.findByKakaoId(kakao_uid) == null) return MyInterestResponseDto.notExistedUser();
+            Users user = userRepo.findByKakaoId(kakao_uid);
+            if (user == null) return MyInterestResponseDto.notExistedUser();
             if (interests.size() > 3) return MyInterestResponseDto.inputFailed();
 
             // 기존의 관심사를 모두 삭제
-            interestsRepo.deleteAllByUserId(kakao_uid);
+            interestsRepo.deleteAllByUser_UserId(user.getUserId());
 
             // 새로운 관심사 추가
             for (Long categoryId : interests) {
                 Optional<Category> category = categoryRepo.findById(categoryId);
-                if (!category.isPresent()) { // 존재하지 않는 카테고리일 경우
+                if (category.isEmpty()) { // 존재하지 않는 카테고리일 경우
                     return MyInterestResponseDto.databaseError();
                 }
-                Interests newInterest = new Interests(kakao_uid, categoryId);
+                Interests newInterest = new Interests(user, category.get());
                 interestsRepo.save(newInterest);
             }
         } catch (Exception exception) {
             log.info("error ", exception.getMessage());
             return MyInterestResponseDto.databaseError();
         }
-        MyInterestResponseDto responseDto = new MyInterestResponseDto();
-        return responseDto.success();
+        return MyInterestResponseDto.success();
     }
 }

@@ -1,22 +1,33 @@
 package com.beotkkot.qtudy.domain.interests;
 
+import com.beotkkot.qtudy.domain.category.Category;
 import com.beotkkot.qtudy.domain.primaryKey.InterestsPK;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.IdClass;
-import lombok.AllArgsConstructor;
+import com.beotkkot.qtudy.domain.user.Users;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 @Entity
-@IdClass(InterestsPK.class) // 복합 키 생성
 public class Interests {
-    @Id
-    private Long userId;
 
-    @Id
-    private Long categoryId;
+    @EmbeddedId
+    private InterestsPK id; // 복합 키
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("userId")   // 복합 키의 userId와 매핑
+    @JoinColumn(name = "user_id")
+    private Users user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("categoryId")   // 복합 키의 categoryId와 매핑
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    public Interests(Users user, Category category) {
+        this.id = new InterestsPK(user.getKakaoId(), category.getCategoryId());
+        this.user = user;
+        this.category = category;
+    }
 }

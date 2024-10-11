@@ -35,68 +35,61 @@ public class CommentService {
     private final UserRepository userRepo;
 
     @Transactional
-    public ResponseEntity<? super CommentsResponseDto> saveComment(Long postId, Long userUid, CommentsRequestDto dto) {
+    public ResponseEntity<? super CommentsResponseDto> saveComment(Long postId, Long kakaoId, CommentsRequestDto dto) {
 
         try {
             if (!postRepo.existsById(postId)) {
                 // 존재하지 않는 포스트
                 return CommentsResponseDto.notExistedPost();
-            } else if (userRepo.findByKakaoId(userUid) == null) {
+            } else if (userRepo.findByKakaoId(kakaoId) == null) {
                 // 존재하지 않는 유저
                 return CommentsResponseDto.notExistedUser();
             } else {
                 // 댓글 엔티티 생성
-                Comments comment = dto.toEntity(postId, userUid);
+                Users user = userRepo.findByKakaoId(kakaoId);
+                Posts post = postRepo.findById(postId).orElseThrow();
+                Comments comment = dto.toEntity(post, user);
 
                 // 댓글 저장
                 commentRepo.save(comment);
 
-                // postRespo의 commentCount 업데이트
-                int commentCount = commentRepo.countByPostId(postId);
-                Posts post = postRepo.findByPostId(postId);
-                post.updateCommentCount(commentCount);
+                post.updateCommentCount(commentRepo.countByPost_postId(post.getPostId()));
             }
         } catch (Exception exception) {
             log.info("error " + exception.getMessage());
             return ResponseDto.databaseError();
         }
-        return CommentsResponseDto.success(userRepo.findByKakaoId(userUid).getName(), userRepo.findByKakaoId(userUid).getProfileImageUrl());
+        return CommentsResponseDto.success(userRepo.findByKakaoId(kakaoId).getName(), userRepo.findByKakaoId(kakaoId).getProfileImageUrl());
     }
 
     public ResponseEntity<? super GetCommentsAllResponseDto> getAllComment(Long postId, int page) {
-        List<CommentListItem> commentListItems = new ArrayList<>();
-        Pageable pageable = PageRequest.of(page, 4, Sort.by("createdAt").descending());
-        try {
-            List<Comments> comments = commentRepo.findAllByPostId(postId, pageable).getContent();
 
-            for (Comments comment : comments) {
-                Users user = userRepo.findByKakaoId(comment.getUserUid());
-                commentListItems.add(CommentListItem.of(comment, user));
-            }
-        } catch (Exception exception) {
-            log.info("error ", exception.getMessage());
-            return ResponseDto.databaseError();
+        Pageable pageable = PageRequest.of(page, 4, Sort.by("createdAt").descending());
+        List<Comments> comments = commentRepo.findByPost_PostId(postId, pageable).getContent();
+
+        List<CommentListItem> commentListItems = new ArrayList<>();
+        for (Comments comment : comments) {
+            Users user = comment.getUser();
+            commentListItems.add(CommentListItem.of(comment, user));
         }
-        GetCommentsAllResponseDto responseDto = new GetCommentsAllResponseDto(commentListItems, page);
-        return responseDto.success(commentListItems, page);
+
+        return GetCommentsAllResponseDto.success(commentListItems, page);
     }
 
     @Transactional
-    public ResponseEntity<? super CommentsResponseDto> patchComment(Long postId, Long commentId, Long userUid, CommentsRequestDto dto) {
+    public ResponseEntity<? super CommentsResponseDto> patchComment(Long postId, Long commentId, Long kakaoId, CommentsRequestDto dto) {
 
+        Users user = userRepo.findByKakaoId(kakaoId);
         try {
-            if (userRepo.findByKakaoId(userUid) == null) {
+            if (user == null) {
                 return CommentsResponseDto.notExistedUser();
             } else if (!postRepo.existsById(postId)) {
                 return CommentsResponseDto.notExistedPost();
             } else if (!commentRepo.existsById(commentId)) {
                 return CommentsResponseDto.notExistedComment();
             } else {
-                // 댓글 수정
-                Comments comment = commentRepo.findById(commentId).get();
-                System.out.println("comment.getUserUid() = " + comment.getUserUid());
-                System.out.println("userUid = " + userUid);
-                if (!comment.getUserUid().equals(userUid)) {
+                Comments comment = commentRepo.findById(commentId).orElseThrow();
+                if (!comment.getUser().getKakaoId().equals(kakaoId)) {
                     return CommentsResponseDto.noPermission();
                 }
                 comment.updateContent(dto.getContent());
@@ -105,13 +98,13 @@ public class CommentService {
             log.info("error " + exception.getMessage());
             return ResponseDto.databaseError();
         }
-        return CommentsResponseDto.success(userRepo.findByKakaoId(userUid).getName(), userRepo.findByKakaoId(userUid).getProfileImageUrl());
+        return CommentsResponseDto.success(user.getName(), user.getProfileImageUrl());
     }
 
     @Transactional
-    public ResponseEntity<? super DeleteCommentsResponseDto> deleteComment(Long postId, Long commentId, Long userUid) {
+    public ResponseEntity<? super DeleteCommentsResponseDto> deleteComment(Long postId, Long commentId, Long kakaoId) {
         try {
-            if (userRepo.findByKakaoId(userUid) == null) {
+            if (userRepo.findByKakaoId(kakaoId) == null) {
                 return DeleteCommentsResponseDto.notExistedUser();
             } else if (!postRepo.existsById(postId)) {
                 return DeleteCommentsResponseDto.notExistedPost();
@@ -119,16 +112,14 @@ public class CommentService {
                 return DeleteCommentsResponseDto.notExistedComment();
             } else {
                 // 댓글 삭제
-                Comments comment = commentRepo.findById(commentId).get();
-                if (!comment.getUserUid().equals(userUid)) {
+                Comments comment = commentRepo.findById(commentId).orElseThrow();
+                if (!comment.getUser().getKakaoId().equals(kakaoId)) {
                     return DeleteCommentsResponseDto.noPermission();
                 }
                 commentRepo.delete(comment);
 
-                // postRespo의 commentCount 업데이트
-                int commentCount = commentRepo.countByPostId(postId);
-                Posts post = postRepo.findByPostId(postId);
-                post.updateCommentCount(commentCount);
+                // commentCount 업데이트
+                comment.getPost().updateCommentCount(commentRepo.countByPost_postId(postId));
             }
         } catch (Exception exception) {
             log.info("error " + exception.getMessage());

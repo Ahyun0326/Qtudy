@@ -1,5 +1,6 @@
 package com.beotkkot.qtudy.domain.quiz;
 
+import com.beotkkot.qtudy.domain.posts.Posts;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,8 +14,9 @@ public class Quiz {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long quizId;
 
-    @Column(nullable = false)
-    private Long postId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "postId", nullable = false)
+    private Posts post;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String tags;

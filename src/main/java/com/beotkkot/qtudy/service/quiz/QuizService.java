@@ -7,6 +7,7 @@ import java.util.*;
 import com.beotkkot.qtudy.domain.posts.Posts;
 import com.beotkkot.qtudy.domain.quiz.Quiz;
 import com.beotkkot.qtudy.domain.quiz.Review;
+import com.beotkkot.qtudy.domain.user.Users;
 import com.beotkkot.qtudy.dto.object.QuizDto;
 import com.beotkkot.qtudy.dto.object.QuizGradeListItem;
 import com.beotkkot.qtudy.dto.object.QuizListItem;
@@ -20,6 +21,7 @@ import com.beotkkot.qtudy.dto.response.quiz.QuizGradeResponseDto;
 import com.beotkkot.qtudy.repository.posts.PostsRepository;
 import com.beotkkot.qtudy.repository.quiz.QuizRepository;
 import com.beotkkot.qtudy.repository.quiz.ReviewRepository;
+import com.beotkkot.qtudy.repository.user.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,6 +46,7 @@ public class QuizService {
     private final QuizRepository quizRepo;
     private final ReviewRepository reviewRepo;
     private final PostsRepository postRepo;
+    private final UserRepository userRepo;
 
     // 퀴즈 생성기
     public String generateQuiz(GenerateQuizRequestDto genQuizReqDto) throws JsonProcessingException {
@@ -105,9 +108,10 @@ public class QuizService {
     public void saveQuiz(PostQuizRequestDto saveQuizDto) {
 
         String optionsString = String.join(",", saveQuizDto.getQuizDto().getOptions());
+        Posts post = postRepo.findById(saveQuizDto.getPostId()).orElseThrow();
 
         Quiz quiz = Quiz.builder()
-                .postId(saveQuizDto.getPostId())
+                .post(post)
                 .tags(saveQuizDto.getTags())
                 .question(saveQuizDto.getQuizDto().getQuestion())
                 .answer(saveQuizDto.getQuizDto().getAnswer())
@@ -126,7 +130,7 @@ public class QuizService {
         List<Long> quizIdList = new ArrayList<>();
         String type = "post";
         try {
-            List<Quiz> quizzes = quizRepo.findAllByPostId(postId);
+            List<Quiz> quizzes = quizRepo.findAllByPost_PostId(postId);
             for (Quiz quiz : quizzes) {
                 answerList.add(quiz.getAnswer());
                 quizIdList.add(quiz.getQuizId());
@@ -137,8 +141,7 @@ public class QuizService {
             return ResponseDto.databaseError();
         }
 
-        GetPostQuizResponseDto responseDto = new GetPostQuizResponseDto(quizListItems, answerList, quizIdList, type);
-        return responseDto.success(quizListItems, answerList, quizIdList, type);
+        return GetPostQuizResponseDto.success(quizListItems, answerList, quizIdList, type);
     }
 
     @Transactional
@@ -159,8 +162,7 @@ public class QuizService {
             return ResponseDto.databaseError();
         }
 
-        GetPostQuizResponseDto responseDto = new GetPostQuizResponseDto(quizListItems, answerList, quizIdList, type);
-        return responseDto.success(quizListItems, answerList, quizIdList, type);
+        return GetPostQuizResponseDto.success(quizListItems, answerList, quizIdList, type);
     }
 
     @Transactional
@@ -180,7 +182,7 @@ public class QuizService {
                 boolean correct = false;
                 int score = 0; // 각 문제의 점수를 따로 계산하기 위해 반복마다 초기화
                 Quiz quiz = quizRepo.findByQuizId(dto.getQuizIdList().get(i));
-                Posts post = postRepo.findByPostId(quiz.getPostId());
+                Posts post = postRepo.findById(quiz.getPost().getPostId()).get();
 
                 // 정답이 int로 입력되어있을 경우
                 if (answerList.get(i).length() == 1) {
@@ -199,11 +201,13 @@ public class QuizService {
                     }
                 }
 
+                Users user = userRepo.findByKakaoId(uuid);
+
                 // 오답노트 entity에 저장
                 Review newReview = Review.builder()
-                        .userId(uuid)
-                        .postId(quiz.getPostId())
-                        .quizId(quiz.getQuizId())
+                        .user(user)
+                        .postId(post.getPostId())
+                        .quiz(quiz)
                         .reviewId(reviewId)
                         .type(dto.getType())
                         .createdAt(writeDatetime)
@@ -227,7 +231,6 @@ public class QuizService {
             return ResponseDto.databaseError();
         }
 
-        QuizGradeResponseDto responseDto = new QuizGradeResponseDto(gradeList, totalScore);
-        return responseDto.success(gradeList, totalScore);
+        return QuizGradeResponseDto.success(gradeList, totalScore);
     }
 }

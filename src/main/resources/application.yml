@@ -16,8 +16,11 @@ spring:
     hibernate:
       ddl-auto: update
 
-# OPEN AI API KEY
-GPT_API_KEY: ${GPT_API_KEY}
-CLOVA_API_KEY_ID: ${CLOVA_API_KEY_ID}
-CLOVA_API_KEY: ${CLOVA_API_KEY}
-OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}
+  profiles:
+    include: secrets
+
+  # OPEN AI API KEY
+  GPT_API_KEY: ${GPT_API_KEY}
+  CLOVA_API_KEY_ID: ${CLOVA_API_KEY_ID}
+  CLOVA_API_KEY: ${CLOVA_API_KEY}
+  OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}
