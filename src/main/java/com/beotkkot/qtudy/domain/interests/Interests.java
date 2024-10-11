@@ -17,12 +17,12 @@ public class Interests {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")   // 복합 키의 userId와 매핑
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "user_id")
     private Users user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("categoryId")   // 복합 키의 categoryId와 매핑
-    @JoinColumn(name = "categoryId")
+    @JoinColumn(name = "category_id")
     private Category category;
 
     public Interests(Users user, Category category) {

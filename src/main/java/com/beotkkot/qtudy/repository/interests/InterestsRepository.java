@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface InterestsRepository extends JpaRepository<Interests, InterestsPK> {
 
-    List<Interests> findAllByUserId(Long userId);
+    List<Interests> findByUser_UserId(Long userId);
 
-    void deleteAllByUserId(Long userId);
+    void deleteAllByUser_UserId(Long userId);
 }
