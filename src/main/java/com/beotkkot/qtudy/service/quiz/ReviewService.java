@@ -31,9 +31,8 @@ import java.util.List;
 public class ReviewService {
 
     private final ReviewRepository reviewRepo;
-    private final UserRepository userRepo;
     private final PostsRepository postRepo;
-    private final QuizRepository quizRepo;
+    private final UserRepository userRepo;
 
     // 내가 푼 퀴즈 전체 조회
     @Transactional
@@ -46,9 +45,9 @@ public class ReviewService {
             totalPages = reviews.getTotalPages();
 
             for (Review review : reviews.getContent()) {
-                Posts post = postRepo.findByPostId(review.getPostId());
-                Users user = userRepo.findByKakaoId(post.getKakaoId());
-                int totalScore = reviewRepo.findScoreByUserIdAndReviewId(kakao_uid, review.getReviewId());
+                Posts post = postRepo.findById(review.getPostId()).orElseThrow();
+                Users user = post.getUser();
+                int totalScore = reviewRepo.findScoreByUserIdAndReviewId(user.getUserId(), review.getReviewId());
                 reviewListItems.add(ReviewListItem.of(user, review, totalScore));
             }
         } catch (Exception exception) {
@@ -56,8 +55,7 @@ public class ReviewService {
             return ResponseDto.databaseError();
         }
 
-        ReviewResponseDto responseDto = new ReviewResponseDto(reviewListItems, page, totalPages);
-        return responseDto.success(reviewListItems, page, totalPages);
+        return ReviewResponseDto.success(reviewListItems, page, totalPages);
     }
 
     // 내가 푼 퀴즈 상세 조회
@@ -67,11 +65,12 @@ public class ReviewService {
         Quiz quiz;
         int totalScore;
         try {
-            List<Review> reviews = reviewRepo.findReviewByReviewId(reviewId);
-            totalScore = reviewRepo.findScoreByUserIdAndReviewId(kakao_uid, reviewId);
+            List<Review> reviews = reviewRepo.findAllReviewByReviewId(reviewId);
+            Users user = userRepo.findByKakaoId(kakao_uid);
+            totalScore = reviewRepo.findScoreByUserIdAndReviewId(user.getUserId(), reviewId);
 
             for (Review review: reviews) {
-                quiz = quizRepo.findByQuizId(review.getQuizId());
+                quiz = review.getQuiz();
                 reviewListItems.add(ReviewDetailListItem.of(quiz, review));
             }
         } catch (Exception exception) {
@@ -79,7 +78,6 @@ public class ReviewService {
             return ResponseDto.databaseError();
         }
 
-        GetReviewResponseDto responseDto = new GetReviewResponseDto(reviewListItems, totalScore);
-        return responseDto.success(reviewListItems, totalScore);
+        return GetReviewResponseDto.success(reviewListItems, totalScore);
     }
 }
