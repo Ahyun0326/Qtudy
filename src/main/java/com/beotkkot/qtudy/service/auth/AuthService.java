@@ -52,7 +52,7 @@ public class AuthService {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type","authorization_code");
         params.add("client_id", OAUTH_CLIENT_ID);
-        params.add("redirect_uri", "http://localhost:3000/auth/redirected/kakao");
+        params.add("redirect_uri", "http://localhost:8080/auth/redirected/kakao");
         params.add("code", code);
 
         // header, body를 가진 엔티티
