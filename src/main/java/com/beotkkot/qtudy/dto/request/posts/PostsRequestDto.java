@@ -1,6 +1,7 @@
 package com.beotkkot.qtudy.dto.request.posts;
 
 import com.beotkkot.qtudy.domain.posts.Posts;
+import com.beotkkot.qtudy.domain.user.Users;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -18,14 +19,14 @@ public class PostsRequestDto {
     private Long categoryId;
     private String summary;
 
-    public Posts toEntity(Long uid, String summary) {
+    public Posts toEntity(Users user, String summary) {
         Date now = Date.from(Instant.now());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String writeDatetime = simpleDateFormat.format(now);
         String tagString = String.join(",", tag);
 
         return Posts.builder()
-                .kakaoId(uid)
+                .user(user)
                 .title(title)
                 .content(content)
                 .summary(summary)
