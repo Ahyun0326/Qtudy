@@ -95,11 +95,6 @@ public class PostsService {
             }
         } catch (Exception exception) {
             exception.printStackTrace();
-//            for (String tagName : increasedTag) {     FIXME
-//                Optional<Tags> existingTag = tagRepo.findByName(tagName);
-//                Tags tag = existingTag.get();
-//                tag.decreaseTagCount();
-//            }
             return ResponseDto.databaseError();
         }
         return PostsResponseDto.success(postId);
@@ -357,11 +352,8 @@ public class PostsService {
 
             PageRequest pageRequest = PageRequest.of(page, 12);
             // 스크랩한 시간 기준으로 내림차순 정렬
-            List<Long> postIds = scrapRepo.findAllPostIdByUserId(user.getUserId());
-            Page<Posts> posts = postsRepo.findByPostIdIn(postIds, pageRequest);
+            Page<Posts> posts = scrapRepo.findScrapPostsByUserId(user.getUserId(), pageRequest);
             totalPages = posts.getTotalPages();
-
-            if (posts == null) return PutScrapResponseDto.notExistedPost();
 
             for (Posts post : posts.getContent())
                 postListItems.add(PostListItem.of(post));

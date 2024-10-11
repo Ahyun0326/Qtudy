@@ -17,18 +17,18 @@ public class Scrap {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "user_id")
     private Users user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("postId")
-    @JoinColumn(name = "postId")
+    @JoinColumn(name = "post_id")
     private Posts post;
 
     private String scrapAt;
 
     public Scrap(Users user, Posts post, String scrapAt) {
-        this.id = new ScrapPk(user.getKakaoId(), post.getPostId());
+        this.id = new ScrapPk(user.getUserId(), post.getPostId());
         this.user = user;
         this.post = post;
         this.scrapAt = scrapAt;
