@@ -1,11 +1,18 @@
 package com.beotkkot.qtudy.service.comments;
 
+import com.beotkkot.qtudy.common.exception.error.CommentErrorCode;
+import com.beotkkot.qtudy.common.exception.error.CommonErrorCode;
+import com.beotkkot.qtudy.common.exception.error.PostErrorCode;
+import com.beotkkot.qtudy.common.exception.error.UserErrorCode;
+import com.beotkkot.qtudy.common.exception.exception.CommentException;
+import com.beotkkot.qtudy.common.exception.exception.CommonException;
+import com.beotkkot.qtudy.common.exception.exception.PostException;
+import com.beotkkot.qtudy.common.exception.exception.UserException;
 import com.beotkkot.qtudy.domain.comments.Comments;
 import com.beotkkot.qtudy.domain.posts.Posts;
 import com.beotkkot.qtudy.domain.user.Users;
 import com.beotkkot.qtudy.dto.object.CommentListItem;
 import com.beotkkot.qtudy.dto.request.comments.CommentsRequestDto;
-import com.beotkkot.qtudy.dto.response.ResponseDto;
 import com.beotkkot.qtudy.dto.response.comments.CommentsResponseDto;
 import com.beotkkot.qtudy.dto.response.comments.DeleteCommentsResponseDto;
 import com.beotkkot.qtudy.dto.response.comments.GetCommentsAllResponseDto;
@@ -37,31 +44,21 @@ public class CommentService {
     @Transactional
     public ResponseEntity<? super CommentsResponseDto> saveComment(Long postId, Long kakaoId, CommentsRequestDto dto) {
 
-        try {
-            if (!postRepo.existsById(postId)) {
-                // 존재하지 않는 포스트
-                return CommentsResponseDto.notExistedPost();
-            } else if (userRepo.findByKakaoId(kakaoId) == null) {
-                // 존재하지 않는 유저
-                return CommentsResponseDto.notExistedUser();
-            } else {
-                // 댓글 엔티티 생성
-                Users user = userRepo.findByKakaoId(kakaoId);
-                Posts post = postRepo.findById(postId).orElseThrow();
-                Comments comment = dto.toEntity(post, user);
-
-                // 댓글 저장
-                commentRepo.save(comment);
-
-                post.updateCommentCount(commentRepo.countByPost_postId(post.getPostId()));
-            }
-        } catch (Exception exception) {
-            log.info("error " + exception.getMessage());
-            return ResponseDto.databaseError();
+        Posts post = postRepo.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.NOT_EXISTED_POST));
+        Users user = userRepo.findByKakaoId(kakaoId);
+        if (user == null) {
+            throw new UserException(UserErrorCode.NOT_EXISTED_USER);
         }
+
+        Comments comment = dto.toEntity(post, user);
+        commentRepo.save(comment);
+
+        post.updateCommentCount(commentRepo.countByPost_postId(post.getPostId()));
+
         return CommentsResponseDto.success(userRepo.findByKakaoId(kakaoId).getName(), userRepo.findByKakaoId(kakaoId).getProfileImageUrl());
     }
 
+    @Transactional(readOnly = true)
     public ResponseEntity<? super GetCommentsAllResponseDto> getAllComment(Long postId, int page) {
 
         Pageable pageable = PageRequest.of(page, 4, Sort.by("createdAt").descending());
@@ -80,51 +77,36 @@ public class CommentService {
     public ResponseEntity<? super CommentsResponseDto> patchComment(Long postId, Long commentId, Long kakaoId, CommentsRequestDto dto) {
 
         Users user = userRepo.findByKakaoId(kakaoId);
-        try {
-            if (user == null) {
-                return CommentsResponseDto.notExistedUser();
-            } else if (!postRepo.existsById(postId)) {
-                return CommentsResponseDto.notExistedPost();
-            } else if (!commentRepo.existsById(commentId)) {
-                return CommentsResponseDto.notExistedComment();
-            } else {
-                Comments comment = commentRepo.findById(commentId).orElseThrow();
-                if (!comment.getUser().getKakaoId().equals(kakaoId)) {
-                    return CommentsResponseDto.noPermission();
-                }
-                comment.updateContent(dto.getContent());
-            }
-        } catch (Exception exception) {
-            log.info("error " + exception.getMessage());
-            return ResponseDto.databaseError();
+        if (!postRepo.existsById(postId)) {
+            throw new PostException(PostErrorCode.NOT_EXISTED_POST);
+        } else if (user == null) {
+            throw new UserException(UserErrorCode.NOT_EXISTED_USER);
         }
+
+        Comments comment = commentRepo.findById(commentId).orElseThrow(() -> new CommentException(CommentErrorCode.NOT_EXISTED_COMMENT));
+        if (!comment.getUser().getKakaoId().equals(kakaoId)) {
+            throw new CommonException(CommonErrorCode.NO_PERMISSION);
+        }
+        comment.updateContent(dto.getContent());
+
         return CommentsResponseDto.success(user.getName(), user.getProfileImageUrl());
     }
 
     @Transactional
     public ResponseEntity<? super DeleteCommentsResponseDto> deleteComment(Long postId, Long commentId, Long kakaoId) {
-        try {
-            if (userRepo.findByKakaoId(kakaoId) == null) {
-                return DeleteCommentsResponseDto.notExistedUser();
-            } else if (!postRepo.existsById(postId)) {
-                return DeleteCommentsResponseDto.notExistedPost();
-            } else if (!commentRepo.existsById(commentId)) {
-                return DeleteCommentsResponseDto.notExistedComment();
-            } else {
-                // 댓글 삭제
-                Comments comment = commentRepo.findById(commentId).orElseThrow();
-                if (!comment.getUser().getKakaoId().equals(kakaoId)) {
-                    return DeleteCommentsResponseDto.noPermission();
-                }
-                commentRepo.delete(comment);
-
-                // commentCount 업데이트
-                comment.getPost().updateCommentCount(commentRepo.countByPost_postId(postId));
-            }
-        } catch (Exception exception) {
-            log.info("error " + exception.getMessage());
-            return ResponseDto.databaseError();
+        if (userRepo.findByKakaoId(kakaoId) == null) {
+            throw new UserException(UserErrorCode.NOT_EXISTED_USER);
+        } else if (!postRepo.existsById(postId)) {
+            throw new PostException(PostErrorCode.NOT_EXISTED_POST);
         }
+
+        Comments comment = commentRepo.findById(commentId).orElseThrow(() -> new CommentException(CommentErrorCode.NOT_EXISTED_COMMENT));
+        if (!comment.getUser().getKakaoId().equals(kakaoId)) {
+            throw new CommonException(CommonErrorCode.NO_PERMISSION);
+        }
+        commentRepo.delete(comment);
+        comment.getPost().updateCommentCount(commentRepo.countByPost_postId(postId));
+
         return DeleteCommentsResponseDto.success();
     }
 }
