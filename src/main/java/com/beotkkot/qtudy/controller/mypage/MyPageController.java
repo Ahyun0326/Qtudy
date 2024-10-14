@@ -24,17 +24,7 @@ public class MyPageController {
     // 관심 분야 목록 초기 선택
     @PostMapping("/my/interests")
     public ResponseEntity<? super MyInterestResponseDto> saveMyInterests(@RequestParam("interests") List<Long> interests, @RequestHeader("Authorization") String token) {
-
-        Long kakao_uid;
-        try {
-            kakao_uid = authService.getKakaoUserInfo(token).getId();
-            if (kakao_uid == null)
-                return MyInterestResponseDto.noAuthentication();
-        } catch (Exception exception) {
-            log.info(exception.getMessage());
-            return MyInterestResponseDto.databaseError();
-        }
-
+        Long kakao_uid = authService.getKakaoUserInfo(token).getId();
         ResponseEntity<? super MyInterestResponseDto> response = myPageService.saveMyInterests(kakao_uid, interests);
         return response;
     }
@@ -42,15 +32,7 @@ public class MyPageController {
     // 내 관심 분야 목록 조회
     @GetMapping("my/interests")
     public ResponseEntity<? super GetMyInterestResponseDto> getMyInterests(@RequestHeader("Authorization") String token) {
-        Long kakao_uid;
-        try {
-            kakao_uid = authService.getKakaoUserInfo(token).getId();
-            if (kakao_uid == null)
-                return GetMyInterestResponseDto.noAuthentication();
-        } catch (Exception exception) {
-            log.info(exception.getMessage());
-            return GetMyInterestResponseDto.databaseError();
-        }
+        Long kakao_uid = authService.getKakaoUserInfo(token).getId();
         ResponseEntity<? super GetMyInterestResponseDto> response = myPageService.getMyInterests(kakao_uid);
         return response;
     }
@@ -58,15 +40,7 @@ public class MyPageController {
     // 내 관심 분야 목록 수정
     @PatchMapping("my/interests")
     public ResponseEntity<? super MyInterestResponseDto> patchMyInterests(@RequestParam("interests") List<Long> interests, @RequestHeader("Authorization") String token) {
-        Long kakao_uid;
-        try {
-            kakao_uid = authService.getKakaoUserInfo(token).getId();
-            if (kakao_uid == null)
-                return MyInterestResponseDto.noAuthentication();
-        } catch (Exception exception) {
-            log.info(exception.getMessage());
-            return MyInterestResponseDto.databaseError();
-        }
+        Long kakao_uid = authService.getKakaoUserInfo(token).getId();
         ResponseEntity<? super MyInterestResponseDto> response = myPageService.patchMyInterests(kakao_uid, interests);
         return response;
     }
@@ -74,37 +48,16 @@ public class MyPageController {
     // 사용자 프로필 조회
     @GetMapping("/my")
     public ResponseEntity<? super GetMyPageInfoResponseDto> getMyPageInfo(@RequestHeader("Authorization") String token) {
-
-        Long kakao_uid;
-        String email;
-        try {
-            kakao_uid = authService.getKakaoUserInfo(token).getId();
-            if (kakao_uid == null)
-                return GetMyPageInfoResponseDto.noAuthentication();
-            email = authService.getKakaoUserInfo(token).getEmail();
-        } catch (Exception exception) {
-            log.info(exception.getMessage());
-            return GetMyPageInfoResponseDto.databaseError();
-        }
-
+        Long kakao_uid = authService.getKakaoUserInfo(token).getId();
+        String email = authService.getKakaoUserInfo(token).getEmail();
         ResponseEntity<? super GetMyPageInfoResponseDto> response = myPageService.getMyPageInfo(kakao_uid, email);
-
         return response;
     }
 
     // 내가 작성한 게시글 확인
     @GetMapping("my/posts")
     public ResponseEntity<? super GetMyPageAllResponseDto> getAllPost(@RequestParam("page") int page, @RequestHeader("Authorization") String token) {
-        Long kakao_uid;
-        try {
-            kakao_uid = authService.getKakaoUserInfo(token).getId();
-            if (kakao_uid == null)
-                return GetMyPageAllResponseDto.noAuthentication();
-        } catch (Exception exception) {
-            log.info(exception.getMessage());
-            return GetMyPageAllResponseDto.databaseError();
-        }
-
+        Long kakao_uid = authService.getKakaoUserInfo(token).getId();
         ResponseEntity<? super GetMyPageAllResponseDto> response = myPageService.getAllPost(kakao_uid, page);
         return response;
     }
@@ -112,16 +65,7 @@ public class MyPageController {
     // 내가 스크랩한 글 확인
     @GetMapping("/my/scrap")
     public ResponseEntity<? super GetMyPageAllResponseDto> getAllScrapPost(@RequestParam("page") int page, @RequestHeader("Authorization") String token) {
-        Long kakao_uid;
-        try {
-            kakao_uid = authService.getKakaoUserInfo(token).getId();
-            if (kakao_uid == null)
-                return GetMyPageAllResponseDto.noAuthentication();
-        } catch (Exception exception) {
-            log.info(exception.getMessage());
-            return GetMyPageAllResponseDto.databaseError();
-        }
-
+        Long kakao_uid = authService.getKakaoUserInfo(token).getId();
         ResponseEntity<? super GetMyPageAllResponseDto> response = myPageService.getAllScrapPost(kakao_uid, page);
         return response;
     }
