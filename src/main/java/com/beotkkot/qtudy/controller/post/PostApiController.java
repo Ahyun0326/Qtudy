@@ -23,23 +23,14 @@ public class PostApiController {
     private final AuthService authService;
 
     @GetMapping("/posts/all")
-    public ResponseEntity<? super GetPostsAllResponseDto> getAllPost(@RequestParam("page")int page) {
+    public ResponseEntity<? super GetPostsAllResponseDto> getAllPost(@RequestParam("page") int page) {
         ResponseEntity<? super GetPostsAllResponseDto> response = postsService.getAllPost(page);
         return response;
     }
 
     @PostMapping("/posts")
     public ResponseEntity<? super PostsResponseDto> save(@RequestHeader(value="Authorization") String token, @RequestBody PostsRequestDto requestDto) {
-        Long kakao_uid;
-        try {
-            kakao_uid = authService.getKakaoUserInfo(token).getId();
-            if (kakao_uid == null)
-                return PostsResponseDto.noAuthentication();
-        } catch (Exception exception) {
-            log.info(exception.getMessage());
-            return PostsResponseDto.databaseError();
-        }
-
+        Long kakao_uid = authService.getKakaoUserInfo(token).getId();
         ResponseEntity<? super PostsResponseDto> response = postsService.savePost(kakao_uid, requestDto);
         return response;
     }
@@ -52,46 +43,21 @@ public class PostApiController {
 
     @PatchMapping("/posts")
     public ResponseEntity<? super PostsResponseDto> patchPost(@RequestParam("postId") Long postId, @RequestHeader(value="Authorization") String token, @RequestBody PostsRequestDto requestDto) {
-        Long kakao_uid;
-        try {
-            kakao_uid = authService.getKakaoUserInfo(token).getId();
-            if (kakao_uid == null)
-                return PostsResponseDto.noAuthentication();
-        } catch (Exception exception) {
-            log.info(exception.getMessage());
-            return PostsResponseDto.databaseError();
-        }
-
+        Long kakao_uid = authService.getKakaoUserInfo(token).getId();
         ResponseEntity<? super PostsResponseDto> response = postsService.patchPost(postId, kakao_uid, requestDto);
         return response;
     }
 
     @DeleteMapping("/posts")
     public ResponseEntity<? super PostsResponseDto> deletePost(@RequestParam("postId") Long postId, @RequestHeader(value="Authorization") String token) {
-        Long kakao_uid;
-        try {
-            kakao_uid = authService.getKakaoUserInfo(token).getId();
-            if (kakao_uid == null)
-                return PostsResponseDto.noAuthentication();
-        } catch (Exception exception) {
-            log.info(exception.getMessage());
-            return PostsResponseDto.databaseError();
-        }
+        Long kakao_uid = authService.getKakaoUserInfo(token).getId();
         ResponseEntity<? super PostsResponseDto> response = postsService.deletePost(postId, kakao_uid);
         return response;
     }
 
     @GetMapping("/posts/my-post-list")
     public ResponseEntity<? super GetPostsAllResponseDto> getMyPost(@RequestHeader(value="Authorization") String token, @RequestParam("page")int page) {
-        Long kakao_uid;
-        try {
-            kakao_uid = authService.getKakaoUserInfo(token).getId();
-            if (kakao_uid == null)
-                return PostsResponseDto.noAuthentication();
-        } catch (Exception exception) {
-            log.info(exception.getMessage());
-            return PostsResponseDto.databaseError();
-        }
+        Long kakao_uid = authService.getKakaoUserInfo(token).getId();
         ResponseEntity<? super GetPostsAllResponseDto> response = postsService.getMyPost(kakao_uid, page);
         return response;
     }
@@ -111,45 +77,21 @@ public class PostApiController {
     // 스크랩
     @PutMapping("/posts/scrap")
     public ResponseEntity<? super PutScrapResponseDto> putScrap(@RequestParam("postId") Long postId, @RequestHeader(value="Authorization") String token) {
-        Long kakao_uid;
-        try {
-            kakao_uid = authService.getKakaoUserInfo(token).getId();
-            if (kakao_uid == null)
-                return PostsResponseDto.noAuthentication();
-        } catch (Exception exception) {
-            log.info(exception.getMessage());
-            return PostsResponseDto.databaseError();
-        }
+        Long kakao_uid = authService.getKakaoUserInfo(token).getId();
         ResponseEntity<? super PutScrapResponseDto> response = postsService.putScrap(postId, kakao_uid);
         return response;
     }
 
     @GetMapping("/posts/scrap-list")
     public ResponseEntity<? super GetPostsAllResponseDto> getAllScrapPost(@RequestHeader(value="Authorization") String token, @RequestParam("page")int page) {
-        Long kakao_uid;
-        try {
-            kakao_uid = authService.getKakaoUserInfo(token).getId();
-            if (kakao_uid == null)
-                return PostsResponseDto.noAuthentication();
-        } catch (Exception exception) {
-            log.info(exception.getMessage());
-            return PostsResponseDto.databaseError();
-        }
+        Long kakao_uid = authService.getKakaoUserInfo(token).getId();
         ResponseEntity<? super GetPostsAllResponseDto> response = postsService.getAllScrapPost(kakao_uid, page);
         return response;
     }
 
     @GetMapping("/posts/all-scrap-list")
     public ResponseEntity<? super GetPostsAllResponseDto> getAllScrapPostNoPage(@RequestHeader(value="Authorization") String token) {
-        Long kakao_uid;
-        try {
-            kakao_uid = authService.getKakaoUserInfo(token).getId();
-            if (kakao_uid == null)
-                return PostsResponseDto.noAuthentication();
-        } catch (Exception exception) {
-            log.info(exception.getMessage());
-            return PostsResponseDto.databaseError();
-        }
+        Long kakao_uid = authService.getKakaoUserInfo(token).getId();
         ResponseEntity<? super GetPostsAllResponseDto> response = postsService.getAllScrapPostNoPage(kakao_uid);
         return response;
     }

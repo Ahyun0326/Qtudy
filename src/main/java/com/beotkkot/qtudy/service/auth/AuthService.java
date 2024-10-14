@@ -1,8 +1,11 @@
 package com.beotkkot.qtudy.service.auth;
 
+import com.beotkkot.qtudy.common.exception.error.CommonErrorCode;
+import com.beotkkot.qtudy.common.exception.error.UserErrorCode;
+import com.beotkkot.qtudy.common.exception.exception.CommonException;
+import com.beotkkot.qtudy.common.exception.exception.UserException;
 import com.beotkkot.qtudy.domain.user.Users;
 import com.beotkkot.qtudy.dto.object.KakaoUserInfo;
-import com.beotkkot.qtudy.dto.response.ResponseDto;
 import com.beotkkot.qtudy.dto.response.auth.AuthResponseDto;
 import com.beotkkot.qtudy.repository.user.UserRepository;
 import com.beotkkot.qtudy.service.user.UserService;
@@ -69,9 +72,8 @@ public class AuthService {
 
         } catch (Exception exception) {
             log.info("error message: " + exception.getMessage());
-            return accessToken;
+            throw new CommonException(CommonErrorCode.INTERNAL_SERVER_ERROR);
         }
-
         return accessToken;
     }
 
@@ -113,7 +115,7 @@ public class AuthService {
 
         } catch (Exception exception) {
             log.info("error message: " + exception.getMessage());
-            return null;
+            throw new UserException(UserErrorCode.AUTHORIZATION_FAIL);
         }
     }
 
@@ -157,14 +159,15 @@ public class AuthService {
         } catch (HttpClientErrorException exception) {
             // 4xx 에러 (클라이언트 오류) 처리
             log.info("error message: " + exception.getMessage());
-            return AuthResponseDto.noAuthentication();
+            throw new UserException(UserErrorCode.AUTHORIZATION_FAIL);
         } catch (HttpServerErrorException exception) {
             // 5xx 에러 (서버 오류) 처리
             log.info("error message: " + exception.getMessage());
-            return ResponseDto.databaseError();
+            throw new CommonException(CommonErrorCode.INTERNAL_SERVER_ERROR);
         } catch (Exception exception) {
             // 그 외 예외 처리
             log.info("error message: " + exception.getMessage());
+            throw new CommonException(CommonErrorCode.INTERNAL_SERVER_ERROR);
         }
         return AuthResponseDto.success();
     }

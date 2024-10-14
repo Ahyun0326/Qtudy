@@ -4,6 +4,10 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.*;
 
+import com.beotkkot.qtudy.common.exception.error.CommonErrorCode;
+import com.beotkkot.qtudy.common.exception.error.PostErrorCode;
+import com.beotkkot.qtudy.common.exception.exception.CommonException;
+import com.beotkkot.qtudy.common.exception.exception.PostException;
 import com.beotkkot.qtudy.domain.posts.Posts;
 import com.beotkkot.qtudy.domain.quiz.Quiz;
 import com.beotkkot.qtudy.domain.quiz.Review;
@@ -15,14 +19,12 @@ import com.beotkkot.qtudy.dto.request.quiz.ChatMessageRequestDto;
 import com.beotkkot.qtudy.dto.request.quiz.GenerateQuizRequestDto;
 import com.beotkkot.qtudy.dto.request.quiz.GradeQuizRequestDto;
 import com.beotkkot.qtudy.dto.request.quiz.PostQuizRequestDto;
-import com.beotkkot.qtudy.dto.response.ResponseDto;
 import com.beotkkot.qtudy.dto.response.quiz.GetPostQuizResponseDto;
 import com.beotkkot.qtudy.dto.response.quiz.QuizGradeResponseDto;
 import com.beotkkot.qtudy.repository.posts.PostsRepository;
 import com.beotkkot.qtudy.repository.quiz.QuizRepository;
 import com.beotkkot.qtudy.repository.quiz.ReviewRepository;
 import com.beotkkot.qtudy.repository.user.UserRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +51,7 @@ public class QuizService {
     private final UserRepository userRepo;
 
     // 퀴즈 생성기
-    public String generateQuiz(GenerateQuizRequestDto genQuizReqDto) throws JsonProcessingException {
+    public String generateQuiz(GenerateQuizRequestDto genQuizReqDto) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer " + GPT_API_KEY);
@@ -87,8 +89,13 @@ public class QuizService {
         // content를 json으로 파싱 후 "data" list 안에 "question", "answer", "options",
         // "explanation"을 QuizDto에 담을 것
         ObjectMapper objectMapper = new ObjectMapper();
-        List<QuizDto> quizDtoList = objectMapper.readValue(content, new TypeReference<List<QuizDto>>() {
-        });
+        List<QuizDto> quizDtoList;
+        try {
+            quizDtoList = objectMapper.readValue(content, new TypeReference<List<QuizDto>>() {
+            });
+        } catch (Exception e) {
+            throw new CommonException(CommonErrorCode.INTERNAL_SERVER_ERROR);
+        }
 
         log.info("*** quizDtoList: " + String.valueOf(quizDtoList));
 
@@ -108,7 +115,8 @@ public class QuizService {
     public void saveQuiz(PostQuizRequestDto saveQuizDto) {
 
         String optionsString = String.join(",", saveQuizDto.getQuizDto().getOptions());
-        Posts post = postRepo.findById(saveQuizDto.getPostId()).orElseThrow();
+        Posts post = postRepo.findById(saveQuizDto.getPostId())
+                .orElseThrow(() -> new PostException(PostErrorCode.NOT_EXISTED_POST));
 
         Quiz quiz = Quiz.builder()
                 .post(post)
@@ -119,54 +127,53 @@ public class QuizService {
                 .explanation(saveQuizDto.getQuizDto().getExplanation())
                 .build();
 
-
         quizRepo.save(quiz);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public ResponseEntity<? super GetPostQuizResponseDto> getPostQuiz(Long postId) {
         List<QuizListItem> quizListItems = new ArrayList<>();
         List<String> answerList = new ArrayList<>();
         List<Long> quizIdList = new ArrayList<>();
         String type = "post";
-        try {
-            List<Quiz> quizzes = quizRepo.findAllByPost_PostId(postId);
-            for (Quiz quiz : quizzes) {
-                answerList.add(quiz.getAnswer());
-                quizIdList.add(quiz.getQuizId());
-                quizListItems.add(QuizListItem.of(quiz));
-            }
-        } catch (Exception exception) {
-            exception.printStackTrace();
-            return ResponseDto.databaseError();
+
+        List<Quiz> quizzes = quizRepo.findAllByPost_PostId(postId);
+        if (quizzes.isEmpty()) {
+            throw new CommonException(CommonErrorCode.RESOURCE_NOT_FOUND);
+        }
+
+        for (Quiz quiz : quizzes) {
+            answerList.add(quiz.getAnswer());
+            quizIdList.add(quiz.getQuizId());
+            quizListItems.add(QuizListItem.of(quiz));
         }
 
         return GetPostQuizResponseDto.success(quizListItems, answerList, quizIdList, type);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public ResponseEntity<? super GetPostQuizResponseDto> getTagQuiz(String tagName) {
         List<QuizListItem> quizListItems = new ArrayList<>();
         List<String> answerList = new ArrayList<>();
         List<Long> quizIdList = new ArrayList<>();
         String type = "tag";
-        try {
-            List<Quiz> quizzes = quizRepo.findByTagName(tagName);
-            for (Quiz quiz : quizzes) {
-                answerList.add(quiz.getAnswer());
-                quizIdList.add(quiz.getQuizId());
-                quizListItems.add(QuizListItem.of(quiz));
-            }
-        } catch (Exception exception) {
-            exception.printStackTrace();
-            return ResponseDto.databaseError();
+
+        List<Quiz> quizzes = quizRepo.findByTagName(tagName);
+        if (quizzes.isEmpty()) {
+            throw new CommonException(CommonErrorCode.RESOURCE_NOT_FOUND);
+        }
+
+        for (Quiz quiz : quizzes) {
+            answerList.add(quiz.getAnswer());
+            quizIdList.add(quiz.getQuizId());
+            quizListItems.add(QuizListItem.of(quiz));
         }
 
         return GetPostQuizResponseDto.success(quizListItems, answerList, quizIdList, type);
     }
 
     @Transactional
-    public ResponseEntity<? super QuizGradeResponseDto> gradeQuiz(GradeQuizRequestDto dto, Long uuid) {
+    public ResponseEntity<? super QuizGradeResponseDto> gradeQuiz(GradeQuizRequestDto dto, Long kakaoId) {
         List<QuizGradeListItem> gradeList = new ArrayList<>();
         List<String> answerList = new ArrayList<>(dto.getAnswerList());
         List<Integer> userAnswerList = new ArrayList<>(dto.getUserAnswerList());
@@ -177,60 +184,53 @@ public class QuizService {
         String writeDatetime = simpleDateFormat.format(now);
         int totalScore = 0;
 
-        try {
-            for (int i = 0; i < answerList.size(); i++) {
-                boolean correct = false;
-                int score = 0; // 각 문제의 점수를 따로 계산하기 위해 반복마다 초기화
-                Quiz quiz = quizRepo.findByQuizId(dto.getQuizIdList().get(i));
-                Posts post = postRepo.findById(quiz.getPost().getPostId()).get();
+        for (int i = 0; i < answerList.size(); i++) {
+            boolean correct = false;
+            int score = 0; // 각 문제의 점수를 따로 계산하기 위해 반복마다 초기화
+            Quiz quiz = quizRepo.findByQuizId(dto.getQuizIdList().get(i));
+            Posts post = quiz.getPost();
 
-                // 정답이 int로 입력되어있을 경우
-                if (answerList.get(i).length() == 1) {
-                    if (Integer.valueOf(answerList.get(i)) == userAnswerList.get(i)) {
-                        score = 10;
-                        correct = true;
-                    }
+            // 정답이 int로 입력되어있을 경우
+            if (answerList.get(i).length() == 1) {
+                if (Integer.valueOf(answerList.get(i)) == userAnswerList.get(i)) {
+                    score = 10;
+                    correct = true;
                 }
-                // 정답이 options의 value로 있을 경우
-                else {
-                    List<String> options = Arrays.asList(quiz.getOptions().split("\\s*,\\s*"));
-                    String userAnswer = options.get(userAnswerList.get(i));
-                    if (answerList.get(i).equals(userAnswer)) {
-                        score = 10;
-                        correct = true;
-                    }
+            }
+            // 정답이 options의 value로 있을 경우
+            else {
+                List<String> options = Arrays.asList(quiz.getOptions().split("\\s*,\\s*"));
+                String userAnswer = options.get(userAnswerList.get(i));
+                if (answerList.get(i).equals(userAnswer)) {
+                    score = 10;
+                    correct = true;
                 }
-
-                Users user = userRepo.findByKakaoId(uuid);
-
-                // 오답노트 entity에 저장
-                Review newReview = Review.builder()
-                        .user(user)
-                        .postId(post.getPostId())
-                        .quiz(quiz)
-                        .reviewId(reviewId)
-                        .type(dto.getType())
-                        .createdAt(writeDatetime)
-                        .userAnswer(userAnswerList.get((i)))
-                        .answer(answerList.get(i))
-                        .correct(correct)
-                        .explanation(quiz.getExplanation())
-                        .categoryId(post.getCategoryId())
-                        .score(score)
-                        .tags(quiz.getTags())
-                        .build();
-
-                reviewRepo.save(newReview);
-
-                gradeList.add(QuizGradeListItem.of(quiz, correct, userAnswerList.get(i)));
-                totalScore += score; // 총점 누적
             }
 
-        } catch (Exception exception) {
-            exception.printStackTrace();
-            return ResponseDto.databaseError();
-        }
+            Users user = userRepo.findByKakaoId(kakaoId);
 
+            // 오답노트 entity에 저장
+            Review newReview = Review.builder()
+                    .user(user)
+                    .postId(post.getPostId())
+                    .quiz(quiz)
+                    .reviewId(reviewId)
+                    .type(dto.getType())
+                    .createdAt(writeDatetime)
+                    .userAnswer(userAnswerList.get((i)))
+                    .answer(answerList.get(i))
+                    .correct(correct)
+                    .explanation(quiz.getExplanation())
+                    .categoryId(post.getCategoryId())
+                    .score(score)
+                    .tags(quiz.getTags())
+                    .build();
+
+            reviewRepo.save(newReview);
+
+            gradeList.add(QuizGradeListItem.of(quiz, correct, userAnswerList.get(i)));
+            totalScore += score; // 총점 누적
+        }
         return QuizGradeResponseDto.success(gradeList, totalScore);
     }
 }

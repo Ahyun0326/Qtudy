@@ -30,18 +30,7 @@ public class CommentController {
     // 댓글 저장
     @PostMapping("/posts/comments")
     public ResponseEntity<? super CommentsResponseDto> save(@RequestParam("postId") Long postId, @RequestHeader("Authorization") String token, @RequestBody CommentsRequestDto requestDto) {
-
-        Long kakao_uid;
-        try {
-            kakao_uid = authService.getKakaoUserInfo(token).getId();
-            if (kakao_uid == null) {
-                return PostsResponseDto.noAuthentication();
-            }
-        } catch (Exception exception) {
-            log.info(exception.getMessage());
-            return PostsResponseDto.databaseError();
-        }
-
+        Long kakao_uid = authService.getKakaoUserInfo(token).getId();
         ResponseEntity<? super CommentsResponseDto> response = commentService.saveComment(postId, kakao_uid, requestDto);
         return response;
     }
@@ -50,17 +39,7 @@ public class CommentController {
     @PatchMapping("/posts/comments")
     public ResponseEntity<? super CommentsResponseDto> patchComment(@RequestParam("postId") Long postId, @RequestParam("commentId") Long commentId,
                              @RequestHeader("Authorization") String token, @RequestBody CommentsRequestDto requestDto) {
-        Long kakao_uid;
-        try {
-            kakao_uid = authService.getKakaoUserInfo(token).getId();
-            if (kakao_uid == null) {
-                return PostsResponseDto.noAuthentication();
-            }
-        } catch (Exception exception) {
-            log.info(exception.getMessage());
-            return PostsResponseDto.databaseError();
-        }
-
+        Long kakao_uid = authService.getKakaoUserInfo(token).getId();
         ResponseEntity<? super CommentsResponseDto> response = commentService.patchComment(postId, commentId, kakao_uid, requestDto);
         return response;
     }
@@ -68,17 +47,7 @@ public class CommentController {
     // 댓글 삭제
     @DeleteMapping("/posts/comments")
     public ResponseEntity<? super DeleteCommentsResponseDto> deleteComment(@RequestParam("postId") Long postId, @RequestParam("commentId") Long commentId, @RequestHeader("Authorization") String token) {
-        Long kakao_uid;
-        try {
-            kakao_uid = authService.getKakaoUserInfo(token).getId();
-            if (kakao_uid == null) {
-                return PostsResponseDto.noAuthentication();
-            }
-        } catch (Exception exception) {
-            log.info(exception.getMessage());
-            return PostsResponseDto.databaseError();
-        }
-
+        Long kakao_uid = authService.getKakaoUserInfo(token).getId();
         ResponseEntity<? super DeleteCommentsResponseDto> response = commentService.deleteComment(postId, commentId, kakao_uid);
         return response;
     }
