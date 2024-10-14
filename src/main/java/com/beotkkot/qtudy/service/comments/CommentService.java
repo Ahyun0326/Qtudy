@@ -34,7 +34,6 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class CommentService {
 
     private final CommentsRepository commentRepo;
