@@ -1,16 +1,16 @@
 package com.beotkkot.qtudy.service.quiz;
 
+import com.beotkkot.qtudy.common.exception.error.PostErrorCode;
+import com.beotkkot.qtudy.common.exception.exception.PostException;
 import com.beotkkot.qtudy.domain.posts.Posts;
 import com.beotkkot.qtudy.domain.quiz.Quiz;
 import com.beotkkot.qtudy.domain.quiz.Review;
 import com.beotkkot.qtudy.domain.user.Users;
 import com.beotkkot.qtudy.dto.object.ReviewDetailListItem;
 import com.beotkkot.qtudy.dto.object.ReviewListItem;
-import com.beotkkot.qtudy.dto.response.ResponseDto;
 import com.beotkkot.qtudy.dto.response.quiz.GetReviewResponseDto;
 import com.beotkkot.qtudy.dto.response.quiz.ReviewResponseDto;
 import com.beotkkot.qtudy.repository.posts.PostsRepository;
-import com.beotkkot.qtudy.repository.quiz.QuizRepository;
 import com.beotkkot.qtudy.repository.quiz.ReviewRepository;
 import com.beotkkot.qtudy.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,49 +35,33 @@ public class ReviewService {
     private final UserRepository userRepo;
 
     // 내가 푼 퀴즈 전체 조회
-    @Transactional
+    @Transactional(readOnly = true)
     public ResponseEntity<? super ReviewResponseDto> getMyQuizList(Long kakao_uid, int page) {
         List<ReviewListItem> reviewListItems = new ArrayList<>();
-        int totalPages;
-        try {
-            PageRequest pageRequest = PageRequest.of(page, 6, Sort.by("createdAt").descending());
-            Page<Review> reviews = reviewRepo.findHighestScoreReviewForEachReviewId(kakao_uid, pageRequest);
-            totalPages = reviews.getTotalPages();
+        PageRequest pageRequest = PageRequest.of(page, 6, Sort.by("createdAt").descending());
+        Page<Review> reviews = reviewRepo.findHighestScoreReviewForEachReviewId(kakao_uid, pageRequest);
 
-            for (Review review : reviews.getContent()) {
-                Posts post = postRepo.findById(review.getPostId()).orElseThrow();
-                Users user = post.getUser();
-                int totalScore = reviewRepo.findScoreByUserIdAndReviewId(user.getUserId(), review.getReviewId());
-                reviewListItems.add(ReviewListItem.of(user, review, totalScore));
-            }
-        } catch (Exception exception) {
-            exception.printStackTrace();
-            return ResponseDto.databaseError();
+        for (Review review : reviews.getContent()) {
+            Posts post = postRepo.findById(review.getPostId())
+                    .orElseThrow(() -> new PostException(PostErrorCode.NOT_EXISTED_POST));
+            Users user = post.getUser();
+            int totalScore = reviewRepo.findScoreByUserIdAndReviewId(user.getUserId(), review.getReviewId());
+            reviewListItems.add(ReviewListItem.of(user, review, totalScore));
         }
-
-        return ReviewResponseDto.success(reviewListItems, page, totalPages);
+        return ReviewResponseDto.success(reviewListItems, page, reviews.getTotalPages());
     }
 
     // 내가 푼 퀴즈 상세 조회
-    @Transactional
+    @Transactional(readOnly = true)
     public ResponseEntity<? super GetReviewResponseDto> getMyQuiz(Long kakao_uid, String reviewId) {
         List<ReviewDetailListItem> reviewListItems = new ArrayList<>();
-        Quiz quiz;
-        int totalScore;
-        try {
-            List<Review> reviews = reviewRepo.findAllReviewByReviewId(reviewId);
-            Users user = userRepo.findByKakaoId(kakao_uid);
-            totalScore = reviewRepo.findScoreByUserIdAndReviewId(user.getUserId(), reviewId);
+        List<Review> reviews = reviewRepo.findAllReviewByReviewId(reviewId);
+        Users user = userRepo.findByKakaoId(kakao_uid);
 
-            for (Review review: reviews) {
-                quiz = review.getQuiz();
-                reviewListItems.add(ReviewDetailListItem.of(quiz, review));
-            }
-        } catch (Exception exception) {
-            exception.printStackTrace();
-            return ResponseDto.databaseError();
+        for (Review review: reviews) {
+            Quiz quiz = review.getQuiz();
+            reviewListItems.add(ReviewDetailListItem.of(quiz, review));
         }
-
-        return GetReviewResponseDto.success(reviewListItems, totalScore);
+        return GetReviewResponseDto.success(reviewListItems, reviewRepo.findScoreByUserIdAndReviewId(user.getUserId(), reviewId));
     }
 }
