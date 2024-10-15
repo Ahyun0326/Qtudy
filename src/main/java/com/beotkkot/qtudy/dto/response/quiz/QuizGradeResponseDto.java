@@ -27,9 +27,4 @@ public class QuizGradeResponseDto extends ResponseDto {
         QuizGradeResponseDto result = new QuizGradeResponseDto(gradeList, score);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
-
-    public static ResponseEntity<ResponseDto> notExistedPost() {
-        ResponseDto result = new ResponseDto(ResponseCode.NOT_EXISTED_POST, ResponseMessage.NOT_EXISTED_POST);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
-    }
 }

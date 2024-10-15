@@ -28,14 +28,4 @@ public class GetMyPageInfoResponseDto extends ResponseDto {
         GetMyPageInfoResponseDto result = new GetMyPageInfoResponseDto(user, email);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
-
-    public static ResponseEntity<ResponseDto> noAuthentication() {
-        ResponseDto result = new ResponseDto(ResponseCode.AUTHORIZATION_FAIL, ResponseMessage.AUTHORIZATION_FAIL);
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result);
-    }
-
-    public static ResponseEntity<ResponseDto> notExistedUser() {
-        ResponseDto result = new ResponseDto(ResponseCode.NOT_EXISTED_USER, ResponseMessage.NOT_EXISTED_USER);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
-    }
 }

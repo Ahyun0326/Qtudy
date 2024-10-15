@@ -48,10 +48,4 @@ public class GetPostsResponseDto extends ResponseDto {
         GetPostsResponseDto result = new GetPostsResponseDto(post, user);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
-
-    public static ResponseEntity<ResponseDto> noExistPost() {
-        ResponseDto result = new ResponseDto(ResponseCode.NOT_EXISTED_POST, ResponseMessage.NOT_EXISTED_POST);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
-    }
-
 }
