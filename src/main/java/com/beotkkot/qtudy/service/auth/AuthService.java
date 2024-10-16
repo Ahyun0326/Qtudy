@@ -139,7 +139,7 @@ public class AuthService {
         return findUser;
     }
 
-    public ResponseEntity<? super AuthResponseDto> logout(String accessToken) {
+    public ResponseEntity<AuthResponseDto> logout(String accessToken) {
         String requestURL = "https://kapi.kakao.com/v1/user/logout";
 
         ResponseEntity<String> response;

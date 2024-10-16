@@ -21,7 +21,7 @@ public class TagService {
     private final TagsRepository tagRepo;
 
     @Transactional(readOnly = true)
-    public ResponseEntity<? super GetTagsResponseDto> getTop3Tags() {
+    public ResponseEntity<GetTagsResponseDto> getTop3Tags() {
         List<TagListItem> top3List = new ArrayList<>();
         List<Tags> tags = tagRepo.findTop3ByOrderByCountDesc();
         for (Tags tag : tags) {
@@ -33,7 +33,7 @@ public class TagService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<? super GetTagsResponseDto> getTagsByCategory(Long categoryId) {
+    public ResponseEntity<GetTagsResponseDto> getTagsByCategory(Long categoryId) {
         List<TagListItem> tagList = new ArrayList<>();
         List<Tags> tags = tagRepo.findByCategory_CategoryId(categoryId);
         for (Tags tag : tags) {

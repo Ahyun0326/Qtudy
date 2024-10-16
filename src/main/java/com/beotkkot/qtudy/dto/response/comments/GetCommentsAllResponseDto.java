@@ -1,9 +1,6 @@
 package com.beotkkot.qtudy.dto.response.comments;
 
-import com.beotkkot.qtudy.common.ResponseCode;
-import com.beotkkot.qtudy.common.ResponseMessage;
 import com.beotkkot.qtudy.dto.object.CommentListItem;
-import com.beotkkot.qtudy.dto.response.ResponseDto;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,12 +9,11 @@ import java.util.List;
 
 
 @Getter
-public class GetCommentsAllResponseDto extends ResponseDto {
+public class GetCommentsAllResponseDto {
     private int page;
     private List<CommentListItem> commentList;
 
     public GetCommentsAllResponseDto(List<CommentListItem> commentListItem, int page) {
-        super(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
         this.page = page;
         this.commentList = commentListItem;
     }

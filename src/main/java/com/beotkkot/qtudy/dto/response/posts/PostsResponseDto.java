@@ -1,18 +1,14 @@
 package com.beotkkot.qtudy.dto.response.posts;
 
-import com.beotkkot.qtudy.common.ResponseCode;
-import com.beotkkot.qtudy.common.ResponseMessage;
-import com.beotkkot.qtudy.dto.response.ResponseDto;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 @Getter
-public class PostsResponseDto extends ResponseDto {
+public class PostsResponseDto {
     private Long postId;
 
     private PostsResponseDto(Long postId) {
-        super(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
         this.postId = postId;
     }
 

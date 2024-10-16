@@ -23,76 +23,65 @@ public class PostApiController {
     private final AuthService authService;
 
     @GetMapping("/posts/all")
-    public ResponseEntity<? super GetPostsAllResponseDto> getAllPost(@RequestParam("page") int page) {
-        ResponseEntity<? super GetPostsAllResponseDto> response = postsService.getAllPost(page);
-        return response;
+    public ResponseEntity<GetPostsAllResponseDto> getAllPost(@RequestParam("page") int page) {
+        return postsService.getAllPost(page);
     }
 
     @PostMapping("/posts")
-    public ResponseEntity<? super PostsResponseDto> save(@RequestHeader(value="Authorization") String token, @RequestBody PostsRequestDto requestDto) {
+    public ResponseEntity<PostsResponseDto> save(@RequestHeader(value="Authorization") String token, @RequestBody PostsRequestDto requestDto) {
         Long kakao_uid = authService.getKakaoUserInfo(token).getId();
-        ResponseEntity<? super PostsResponseDto> response = postsService.savePost(kakao_uid, requestDto);
-        return response;
+        return postsService.savePost(kakao_uid, requestDto);
     }
 
     @GetMapping("/posts")
-    public ResponseEntity<? super GetPostsResponseDto> getPost(@RequestParam("postId") Long postId) {
-        ResponseEntity<? super GetPostsResponseDto> response = postsService.getPost(postId);
-        return response;
+    public ResponseEntity<GetPostsResponseDto> getPost(@RequestParam("postId") Long postId) {
+        return postsService.getPost(postId);
     }
 
     @PatchMapping("/posts")
-    public ResponseEntity<? super PostsResponseDto> patchPost(@RequestParam("postId") Long postId, @RequestHeader(value="Authorization") String token, @RequestBody PostsRequestDto requestDto) {
+    public ResponseEntity<PostsResponseDto> patchPost(@RequestParam("postId") Long postId, @RequestHeader(value="Authorization") String token, @RequestBody PostsRequestDto requestDto) {
         Long kakao_uid = authService.getKakaoUserInfo(token).getId();
-        ResponseEntity<? super PostsResponseDto> response = postsService.patchPost(postId, kakao_uid, requestDto);
-        return response;
+        return postsService.patchPost(postId, kakao_uid, requestDto);
     }
 
     @DeleteMapping("/posts")
-    public ResponseEntity<? super PostsResponseDto> deletePost(@RequestParam("postId") Long postId, @RequestHeader(value="Authorization") String token) {
+    public ResponseEntity<PostsResponseDto> deletePost(@RequestParam("postId") Long postId, @RequestHeader(value="Authorization") String token) {
         Long kakao_uid = authService.getKakaoUserInfo(token).getId();
-        ResponseEntity<? super PostsResponseDto> response = postsService.deletePost(postId, kakao_uid);
-        return response;
+        return postsService.deletePost(postId, kakao_uid);
     }
 
     @GetMapping("/posts/my-post-list")
-    public ResponseEntity<? super GetPostsAllResponseDto> getMyPost(@RequestHeader(value="Authorization") String token, @RequestParam("page")int page) {
+    public ResponseEntity<GetPostsAllResponseDto> getMyPost(@RequestHeader(value="Authorization") String token, @RequestParam("page")int page) {
         Long kakao_uid = authService.getKakaoUserInfo(token).getId();
-        ResponseEntity<? super GetPostsAllResponseDto> response = postsService.getMyPost(kakao_uid, page);
-        return response;
+        return postsService.getMyPost(kakao_uid, page);
     }
 
     @GetMapping("/posts/search-list")
-    public ResponseEntity<? super GetPostsAllResponseDto> getSearchPost(@RequestParam("searchWord") String searchWord, @RequestParam("page")int page) {
-        ResponseEntity<? super GetPostsAllResponseDto> response = postsService.getSearchPost(searchWord, page);
-        return response;
+    public ResponseEntity<GetPostsAllResponseDto> getSearchPost(@RequestParam("searchWord") String searchWord, @RequestParam("page")int page) {
+        return postsService.getSearchPost(searchWord, page);
     }
 
     @GetMapping("/posts/category-list")
-    public ResponseEntity<? super GetPostsAllResponseDto> searchPostsByCategory(@RequestParam("categoryId") List<Long> categories, @RequestParam("page")int page) {
-        ResponseEntity<? super GetPostsAllResponseDto> response = postsService.getCategorySearchPost(categories, page);
-        return response;
+    public ResponseEntity<GetPostsAllResponseDto> searchPostsByCategory(@RequestParam("categoryId") List<Long> categories, @RequestParam("page")int page) {
+        return postsService.getCategorySearchPost(categories, page);
     }
 
     // 스크랩
     @PutMapping("/posts/scrap")
-    public ResponseEntity<? super PutScrapResponseDto> putScrap(@RequestParam("postId") Long postId, @RequestHeader(value="Authorization") String token) {
+    public ResponseEntity<PutScrapResponseDto> putScrap(@RequestParam("postId") Long postId, @RequestHeader(value="Authorization") String token) {
         Long kakao_uid = authService.getKakaoUserInfo(token).getId();
-        ResponseEntity<? super PutScrapResponseDto> response = postsService.putScrap(postId, kakao_uid);
-        return response;
+        return postsService.putScrap(postId, kakao_uid);
     }
 
     @GetMapping("/posts/scrap-list")
-    public ResponseEntity<? super GetPostsAllResponseDto> getAllScrapPost(@RequestHeader(value="Authorization") String token, @RequestParam("page")int page) {
+    public ResponseEntity<GetPostsAllResponseDto> getAllScrapPost(@RequestHeader(value="Authorization") String token, @RequestParam("page")int page) {
         Long kakao_uid = authService.getKakaoUserInfo(token).getId();
-        ResponseEntity<? super GetPostsAllResponseDto> response = postsService.getAllScrapPost(kakao_uid, page);
-        return response;
+        return postsService.getAllScrapPost(kakao_uid, page);
     }
 
     @GetMapping("/posts/all-scrap-list")
-    public ResponseEntity<? super GetPostsAllResponseDto> getAllScrapPostNoPage(@RequestHeader(value="Authorization") String token) {
+    public ResponseEntity<GetPostsAllResponseDto> getAllScrapPostNoPage(@RequestHeader(value="Authorization") String token) {
         Long kakao_uid = authService.getKakaoUserInfo(token).getId();
-        ResponseEntity<? super GetPostsAllResponseDto> response = postsService.getAllScrapPostNoPage(kakao_uid);
-        return response;
+        return postsService.getAllScrapPostNoPage(kakao_uid);
     }
 }

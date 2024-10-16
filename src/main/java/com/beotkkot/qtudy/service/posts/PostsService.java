@@ -51,7 +51,7 @@ public class PostsService {
     private final CategoryRepository categoryRepo;
 
     @Transactional
-    public ResponseEntity<? super PostsResponseDto> savePost(Long kakao_uid, PostsRequestDto dto) {
+    public ResponseEntity<PostsResponseDto> savePost(Long kakao_uid, PostsRequestDto dto) {
         List<Tags> newTagList = new ArrayList<>();
         List<String> increasedTag = new ArrayList<>();
 
@@ -92,7 +92,7 @@ public class PostsService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<? super GetPostsResponseDto> getPost(Long postId) {
+    public ResponseEntity<GetPostsResponseDto> getPost(Long postId) {
         Posts post = postsRepo.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.NOT_EXISTED_POST));
         Users user = post.getUser();
 
@@ -100,7 +100,7 @@ public class PostsService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<? super GetSummaryResponseDto> getSummary(Long postId) {
+    public ResponseEntity<GetSummaryResponseDto> getSummary(Long postId) {
         Posts post = postsRepo.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.NOT_EXISTED_POST));
         String summary = post.getSummary();
 
@@ -108,7 +108,7 @@ public class PostsService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<? super GetPostsAllResponseDto> getAllPost(int page) {
+    public ResponseEntity<GetPostsAllResponseDto> getAllPost(int page) {
         List<PostListItem> postListItems = new ArrayList<>();
         PageRequest pageRequest = PageRequest.of(page, 12, Sort.by("createdAt").descending());
         Page<Posts> posts = postsRepo.findAll(pageRequest);
@@ -119,7 +119,7 @@ public class PostsService {
     }
 
     @Transactional
-    public ResponseEntity<? super PostsResponseDto> patchPost(Long postId, Long kakao_uid, PostsRequestDto dto) {
+    public ResponseEntity<PostsResponseDto> patchPost(Long postId, Long kakao_uid, PostsRequestDto dto) {
         Posts post = postsRepo.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.NOT_EXISTED_POST));
         if (userRepo.findByKakaoId(kakao_uid) == null) {
             throw new UserException(UserErrorCode.NOT_EXISTED_USER);
@@ -172,7 +172,7 @@ public class PostsService {
     }
 
     @Transactional
-    public ResponseEntity<? super PostsResponseDto> deletePost(Long postId, Long kakao_uid) {
+    public ResponseEntity<PostsResponseDto> deletePost(Long postId, Long kakao_uid) {
         Posts post = postsRepo.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.NOT_EXISTED_POST));
         if (userRepo.findByKakaoId(kakao_uid) == null) {
             throw new UserException(UserErrorCode.NOT_EXISTED_USER);
@@ -198,7 +198,7 @@ public class PostsService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<? super GetPostsAllResponseDto> getMyPost(Long kakao_uid, int page) {
+    public ResponseEntity<GetPostsAllResponseDto> getMyPost(Long kakao_uid, int page) {
         List<PostListItem> postListItems = new ArrayList<>();
         PageRequest pageRequest = PageRequest.of(page, 12, Sort.by("createdAt").descending());
 
@@ -210,7 +210,7 @@ public class PostsService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<? super GetPostsAllResponseDto> getSearchPost(String searchWord, int page) {
+    public ResponseEntity<GetPostsAllResponseDto> getSearchPost(String searchWord, int page) {
         List<PostListItem> postListItems = new ArrayList<>();
         PageRequest pageRequest = PageRequest.of(page, 12, Sort.by("createdAt").descending());
 
@@ -222,7 +222,7 @@ public class PostsService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<? super GetPostsAllResponseDto> getCategorySearchPost(List<Long> categories, int page) {
+    public ResponseEntity<GetPostsAllResponseDto> getCategorySearchPost(List<Long> categories, int page) {
         List<PostListItem> postListItems = new ArrayList<>();
         PageRequest pageRequest = PageRequest.of(page, 12, Sort.by("createdAt").descending());
 
@@ -236,7 +236,7 @@ public class PostsService {
 
     // 스크랩
     @Transactional
-    public ResponseEntity<? super PutScrapResponseDto> putScrap(Long postId, Long kakao_uid) {
+    public ResponseEntity<PutScrapResponseDto> putScrap(Long postId, Long kakao_uid) {
         Users user = userRepo.findByKakaoId(kakao_uid);
         if (user == null) {
             throw new UserException(UserErrorCode.NOT_EXISTED_USER);
@@ -265,7 +265,7 @@ public class PostsService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<? super GetPostsAllResponseDto> getAllScrapPost(Long kakao_uid, int page) {
+    public ResponseEntity<GetPostsAllResponseDto> getAllScrapPost(Long kakao_uid, int page) {
         List<PostListItem> postListItems = new ArrayList<>();
         Users user = userRepo.findByKakaoId(kakao_uid);
         if (user == null) {
@@ -283,7 +283,7 @@ public class PostsService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<? super GetPostsAllResponseDto> getAllScrapPostNoPage(Long kakao_uid) {
+    public ResponseEntity<GetPostsAllResponseDto> getAllScrapPostNoPage(Long kakao_uid) {
         List<PostListItem> postListItems = new ArrayList<>();
         Users user = userRepo.findByKakaoId(kakao_uid);
         if (user == null) {

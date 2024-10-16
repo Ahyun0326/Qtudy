@@ -1,9 +1,6 @@
 package com.beotkkot.qtudy.dto.response.quiz;
 
-import com.beotkkot.qtudy.common.ResponseCode;
-import com.beotkkot.qtudy.common.ResponseMessage;
 import com.beotkkot.qtudy.dto.object.QuizGradeListItem;
-import com.beotkkot.qtudy.dto.response.ResponseDto;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,13 +8,12 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 @Getter
-public class QuizGradeResponseDto extends ResponseDto {
+public class QuizGradeResponseDto {
     private int score;
     private int total_score;
     private List<QuizGradeListItem> gradeList;
 
     public QuizGradeResponseDto(List<QuizGradeListItem> gradeList, int score) {
-        super(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
         this.score = score;
         this.total_score = 100;
         this.gradeList = gradeList;

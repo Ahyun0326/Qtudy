@@ -1,20 +1,16 @@
 package com.beotkkot.qtudy.dto.response.comments;
 
-import com.beotkkot.qtudy.common.ResponseCode;
-import com.beotkkot.qtudy.common.ResponseMessage;
-import com.beotkkot.qtudy.dto.response.ResponseDto;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 @Getter
-public class CommentsResponseDto extends ResponseDto{
+public class CommentsResponseDto {
 
     private String name;
     private String profileImageUrl;
 
     public CommentsResponseDto(String name, String profileImageUrl) {
-        super(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
         this.name = name;
         this.profileImageUrl = profileImageUrl;
     }

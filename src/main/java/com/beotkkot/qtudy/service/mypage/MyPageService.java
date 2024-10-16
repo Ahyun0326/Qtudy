@@ -43,7 +43,7 @@ public class MyPageService {
 
     // 관심사 저장
     @Transactional
-    public ResponseEntity<? super MyInterestResponseDto> saveMyInterests(Long kakao_uid, List<Long> interests) {
+    public ResponseEntity<MyInterestResponseDto> saveMyInterests(Long kakao_uid, List<Long> interests) {
 
         Users user = userRepo.findByKakaoId(kakao_uid);
         if (user == null) {
@@ -68,7 +68,7 @@ public class MyPageService {
 
     // 관심 분야 목록 조회
     @Transactional(readOnly = true)
-    public ResponseEntity<? super GetMyInterestResponseDto> getMyInterests(Long kakao_uid) {
+    public ResponseEntity<GetMyInterestResponseDto> getMyInterests(Long kakao_uid) {
 
         List<Long> interestIds = new ArrayList<>();
         Users user = userRepo.findByKakaoId(kakao_uid);
@@ -85,7 +85,7 @@ public class MyPageService {
 
     // 마이페이지에서 자신의 정보 조회 (관심사, 사용자 이름, 이메일, 사용자 프로필이미지)
     @Transactional(readOnly = true)
-    public ResponseEntity<? super GetMyPageInfoResponseDto> getMyPageInfo(Long kakao_uid, String email) {
+    public ResponseEntity<GetMyPageInfoResponseDto> getMyPageInfo(Long kakao_uid, String email) {
         Users user = userRepo.findByKakaoId(kakao_uid);
         if (user == null) {
             throw new UserException(UserErrorCode.NOT_EXISTED_USER);
@@ -94,7 +94,7 @@ public class MyPageService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<? super GetMyPageAllResponseDto> getAllPost(Long kakao_uid, int page) {
+    public ResponseEntity<GetMyPageAllResponseDto> getAllPost(Long kakao_uid, int page) {
         List<PostListItem> postListItems = new ArrayList<>();
         PageRequest pageRequest = PageRequest.of(page, 6, Sort.by("createdAt").descending());
 
@@ -106,7 +106,7 @@ public class MyPageService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<? super GetMyPageAllResponseDto> getAllScrapPost(Long kakao_uid, int page) {
+    public ResponseEntity<GetMyPageAllResponseDto> getAllScrapPost(Long kakao_uid, int page) {
 
         List<PostListItem> postListItems = new ArrayList<>();
         Users user = userRepo.findByKakaoId(kakao_uid);
@@ -124,7 +124,7 @@ public class MyPageService {
     }
 
     @Transactional
-    public ResponseEntity<? super MyInterestResponseDto> patchMyInterests(Long kakao_uid, List<Long> interests) {
+    public ResponseEntity<MyInterestResponseDto> patchMyInterests(Long kakao_uid, List<Long> interests) {
         Users user = userRepo.findByKakaoId(kakao_uid);
         if (user == null) {
             throw new UserException(UserErrorCode.NOT_EXISTED_USER);

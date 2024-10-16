@@ -36,7 +36,7 @@ public class ReviewService {
 
     // 내가 푼 퀴즈 전체 조회
     @Transactional(readOnly = true)
-    public ResponseEntity<? super ReviewResponseDto> getMyQuizList(Long kakao_uid, int page) {
+    public ResponseEntity<ReviewResponseDto> getMyQuizList(Long kakao_uid, int page) {
         List<ReviewListItem> reviewListItems = new ArrayList<>();
         PageRequest pageRequest = PageRequest.of(page, 6, Sort.by("createdAt").descending());
         Page<Review> reviews = reviewRepo.findHighestScoreReviewForEachReviewId(kakao_uid, pageRequest);
@@ -53,7 +53,7 @@ public class ReviewService {
 
     // 내가 푼 퀴즈 상세 조회
     @Transactional(readOnly = true)
-    public ResponseEntity<? super GetReviewResponseDto> getMyQuiz(Long kakao_uid, String reviewId) {
+    public ResponseEntity<GetReviewResponseDto> getMyQuiz(Long kakao_uid, String reviewId) {
         List<ReviewDetailListItem> reviewListItems = new ArrayList<>();
         List<Review> reviews = reviewRepo.findAllReviewByReviewId(reviewId);
         Users user = userRepo.findByKakaoId(kakao_uid);

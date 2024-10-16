@@ -26,46 +26,41 @@ public class QuizController {
 
     // 퀴즈 생성 및 저장
     @PostMapping("/quiz")
-    public ResponseEntity<?> generateQuiz(@RequestBody GenerateQuizRequestDto dto) {
+    public ResponseEntity<Object> generateQuiz(@RequestBody GenerateQuizRequestDto dto) {
         return ResponseEntity.ok().body(quizService.generateQuiz(dto));
     }
 
     // 태그별 랜덤 10개 퀴즈 출력
     @GetMapping("/quiz/tag-quiz")
-    public ResponseEntity<? super GetPostQuizResponseDto> getTagQuiz(@RequestParam String tagName) {
-        ResponseEntity<? super GetPostQuizResponseDto> response = quizService.getTagQuiz(tagName);
-        return response;
+    public ResponseEntity<GetPostQuizResponseDto> getTagQuiz(@RequestParam String tagName) {
+        return quizService.getTagQuiz(tagName);
     }
 
     // 게시글 별 생성된 퀴즈 출력
     @GetMapping("/quiz/post-quiz")
-    public ResponseEntity<? super GetPostQuizResponseDto> getPostQuiz(@RequestParam Long postId) {
-        ResponseEntity<? super GetPostQuizResponseDto> response = quizService.getPostQuiz(postId);
-        return response;
+    public ResponseEntity<GetPostQuizResponseDto> getPostQuiz(@RequestParam Long postId) {
+        return quizService.getPostQuiz(postId);
     }
 
 
     // 정답 채점
     @PostMapping("/quiz/grade")
-    public ResponseEntity<? super QuizGradeResponseDto> gradeQuiz(@RequestHeader(value="Authorization") String token, @RequestBody GradeQuizRequestDto dto) {
+    public ResponseEntity<QuizGradeResponseDto> gradeQuiz(@RequestHeader(value="Authorization") String token, @RequestBody GradeQuizRequestDto dto) {
         Long kakao_uid = authService.getKakaoUserInfo(token).getId();
-        ResponseEntity<? super QuizGradeResponseDto> response = quizService.gradeQuiz(dto, kakao_uid);
-        return response;
+        return quizService.gradeQuiz(dto, kakao_uid);
     }
 
     // 내가 푼 퀴즈 전체 조회
     @GetMapping("/my/quiz/all")
-    public ResponseEntity<? super ReviewResponseDto> getMyQuizList(@RequestHeader(value="Authorization") String token, @RequestParam int page) {
+    public ResponseEntity<ReviewResponseDto> getMyQuizList(@RequestHeader(value="Authorization") String token, @RequestParam int page) {
         Long kakao_uid = authService.getKakaoUserInfo(token).getId();
-        ResponseEntity<? super ReviewResponseDto> response = reviewService.getMyQuizList(kakao_uid, page);
-        return response;
+        return reviewService.getMyQuizList(kakao_uid, page);
     }
 
     // 내가 푼 퀴즈 상세 조회
     @GetMapping("/my/quiz")
-    public ResponseEntity<? super GetReviewResponseDto> getMyQuiz(@RequestHeader(value="Authorization") String token, @RequestParam String reviewId) {
+    public ResponseEntity<GetReviewResponseDto> getMyQuiz(@RequestHeader(value="Authorization") String token, @RequestParam String reviewId) {
         Long kakao_uid = authService.getKakaoUserInfo(token).getId();
-        ResponseEntity<? super GetReviewResponseDto> response = reviewService.getMyQuiz(kakao_uid, reviewId);
-        return response;
+        return reviewService.getMyQuiz(kakao_uid, reviewId);
     }
 }

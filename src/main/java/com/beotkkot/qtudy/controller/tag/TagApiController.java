@@ -14,14 +14,12 @@ public class TagApiController {
     private final TagService tagService;
 
     @GetMapping("/tag/top3")
-    public ResponseEntity<? super GetTagsResponseDto> getTop3Tags() {
-        ResponseEntity<? super GetTagsResponseDto> response = tagService.getTop3Tags();
-        return response;
+    public ResponseEntity<GetTagsResponseDto> getTop3Tags() {
+        return tagService.getTop3Tags();
     }
 
     @GetMapping("/tag")
-    public ResponseEntity<? super GetTagsResponseDto> getTagsByCategory(@RequestParam("categoryId") Long categoryId) {
-        ResponseEntity<? super GetTagsResponseDto> response = tagService.getTagsByCategory(categoryId);
-        return response;
+    public ResponseEntity<GetTagsResponseDto> getTagsByCategory(@RequestParam("categoryId") Long categoryId) {
+        return tagService.getTagsByCategory(categoryId);
     }
 }

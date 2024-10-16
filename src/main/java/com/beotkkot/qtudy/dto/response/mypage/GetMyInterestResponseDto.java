@@ -1,8 +1,5 @@
 package com.beotkkot.qtudy.dto.response.mypage;
 
-import com.beotkkot.qtudy.common.ResponseCode;
-import com.beotkkot.qtudy.common.ResponseMessage;
-import com.beotkkot.qtudy.dto.response.ResponseDto;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,12 +7,11 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 @Getter
-public class GetMyInterestResponseDto extends ResponseDto {
+public class GetMyInterestResponseDto {
 
     private List<Long> interests;
 
     public GetMyInterestResponseDto(List<Long> interests) {
-        super(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
         this.interests = interests;
     }
 

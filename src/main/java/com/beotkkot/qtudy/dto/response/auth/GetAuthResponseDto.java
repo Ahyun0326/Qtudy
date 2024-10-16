@@ -1,16 +1,13 @@
 package com.beotkkot.qtudy.dto.response.auth;
 
-import com.beotkkot.qtudy.common.ResponseCode;
-import com.beotkkot.qtudy.common.ResponseMessage;
 import com.beotkkot.qtudy.domain.user.Users;
-import com.beotkkot.qtudy.dto.response.ResponseDto;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 @Getter
-public class GetAuthResponseDto extends ResponseDto {
+public class GetAuthResponseDto {
 
     private Long kakaoId;
     private Long id;
@@ -21,8 +18,6 @@ public class GetAuthResponseDto extends ResponseDto {
 
     @Builder
     private GetAuthResponseDto(Users user, String accessToken) {
-        super(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
-
         this.kakaoId = user.getKakaoId();
         this.id = user.getUserId();
         this.accessToken = accessToken;

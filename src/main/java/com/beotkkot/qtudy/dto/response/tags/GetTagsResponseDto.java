@@ -1,9 +1,6 @@
 package com.beotkkot.qtudy.dto.response.tags;
 
-import com.beotkkot.qtudy.common.ResponseCode;
-import com.beotkkot.qtudy.common.ResponseMessage;
 import com.beotkkot.qtudy.dto.object.TagListItem;
-import com.beotkkot.qtudy.dto.response.ResponseDto;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,11 +8,10 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 @Getter
-public class GetTagsResponseDto extends ResponseDto {
+public class GetTagsResponseDto {
     private List<TagListItem> tagList;
 
     public GetTagsResponseDto(List<TagListItem> TagListItem) {
-        super(ResponseCode.SUCCESS, ResponseMessage.SUCCESS);
         this.tagList = TagListItem;
     }
 

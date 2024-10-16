@@ -131,7 +131,7 @@ public class QuizService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<? super GetPostQuizResponseDto> getPostQuiz(Long postId) {
+    public ResponseEntity<GetPostQuizResponseDto> getPostQuiz(Long postId) {
         List<QuizListItem> quizListItems = new ArrayList<>();
         List<String> answerList = new ArrayList<>();
         List<Long> quizIdList = new ArrayList<>();
@@ -152,7 +152,7 @@ public class QuizService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<? super GetPostQuizResponseDto> getTagQuiz(String tagName) {
+    public ResponseEntity<GetPostQuizResponseDto> getTagQuiz(String tagName) {
         List<QuizListItem> quizListItems = new ArrayList<>();
         List<String> answerList = new ArrayList<>();
         List<Long> quizIdList = new ArrayList<>();
@@ -173,7 +173,7 @@ public class QuizService {
     }
 
     @Transactional
-    public ResponseEntity<? super QuizGradeResponseDto> gradeQuiz(GradeQuizRequestDto dto, Long kakaoId) {
+    public ResponseEntity<QuizGradeResponseDto> gradeQuiz(GradeQuizRequestDto dto, Long kakaoId) {
         List<QuizGradeListItem> gradeList = new ArrayList<>();
         List<String> answerList = new ArrayList<>(dto.getAnswerList());
         List<Integer> userAnswerList = new ArrayList<>(dto.getUserAnswerList());
