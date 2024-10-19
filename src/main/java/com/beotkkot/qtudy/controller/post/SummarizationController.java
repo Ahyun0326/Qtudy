@@ -17,8 +17,7 @@ public class SummarizationController {
     private final PostsService postsService;
 
     @GetMapping("/summary")
-    public ResponseEntity<? super GetSummaryResponseDto> summary(@RequestParam("postId") Long postId) {
-        ResponseEntity<? super GetSummaryResponseDto> response = postsService.getSummary(postId);
-        return response;
+    public ResponseEntity<GetSummaryResponseDto> summary(@RequestParam("postId") Long postId) {
+        return postsService.getSummary(postId);
     }
 }

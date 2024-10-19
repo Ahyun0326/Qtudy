@@ -20,7 +20,7 @@ public class AuthController {
 
     // 프론트로부터 인가 code를 받아와 카카오 서버로부터 토큰 얻기
     @GetMapping("")
-    public ResponseEntity<? super GetAuthResponseDto> kakaoLogin(@RequestParam("code") String code) {
+    public ResponseEntity<GetAuthResponseDto> kakaoLogin(@RequestParam("code") String code) {
 
         // 1. 인가 코드를 통해 카카오 서버로부터 토큰을 얻는다
         String accessToken = authService.getAccessToken(code);
@@ -41,8 +41,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<? super AuthResponseDto> logout(@RequestHeader("Authorization") String accessToken) {
-        ResponseEntity<? super AuthResponseDto> response = authService.logout(accessToken);
-        return response;
+    public ResponseEntity<AuthResponseDto> logout(@RequestHeader("Authorization") String accessToken) {
+        return authService.logout(accessToken);
     }
 }

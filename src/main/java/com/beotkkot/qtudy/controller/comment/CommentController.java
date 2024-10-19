@@ -4,7 +4,6 @@ import com.beotkkot.qtudy.dto.request.comments.CommentsRequestDto;
 import com.beotkkot.qtudy.dto.response.comments.CommentsResponseDto;
 import com.beotkkot.qtudy.dto.response.comments.DeleteCommentsResponseDto;
 import com.beotkkot.qtudy.dto.response.comments.GetCommentsAllResponseDto;
-import com.beotkkot.qtudy.dto.response.posts.PostsResponseDto;
 import com.beotkkot.qtudy.service.auth.AuthService;
 import com.beotkkot.qtudy.service.comments.CommentService;
 import lombok.RequiredArgsConstructor;
@@ -22,33 +21,29 @@ public class CommentController {
 
     // 전체 댓글 조회
     @GetMapping("/posts/comments/all")
-    public ResponseEntity<? super GetCommentsAllResponseDto> getAllComment(@RequestParam("postId") Long postId, @RequestParam("page") int page) {
-        ResponseEntity<? super GetCommentsAllResponseDto> response = commentService.getAllComment(postId, page);
-        return response;
+    public ResponseEntity<GetCommentsAllResponseDto> getAllComment(@RequestParam("postId") Long postId, @RequestParam("page") int page) {
+        return commentService.getAllComment(postId, page);
     }
 
     // 댓글 저장
     @PostMapping("/posts/comments")
-    public ResponseEntity<? super CommentsResponseDto> save(@RequestParam("postId") Long postId, @RequestHeader("Authorization") String token, @RequestBody CommentsRequestDto requestDto) {
+    public ResponseEntity<CommentsResponseDto> save(@RequestParam("postId") Long postId, @RequestHeader("Authorization") String token, @RequestBody CommentsRequestDto requestDto) {
         Long kakao_uid = authService.getKakaoUserInfo(token).getId();
-        ResponseEntity<? super CommentsResponseDto> response = commentService.saveComment(postId, kakao_uid, requestDto);
-        return response;
+        return commentService.saveComment(postId, kakao_uid, requestDto);
     }
 
     // 댓글 수정
     @PatchMapping("/posts/comments")
-    public ResponseEntity<? super CommentsResponseDto> patchComment(@RequestParam("postId") Long postId, @RequestParam("commentId") Long commentId,
+    public ResponseEntity<CommentsResponseDto> patchComment(@RequestParam("postId") Long postId, @RequestParam("commentId") Long commentId,
                              @RequestHeader("Authorization") String token, @RequestBody CommentsRequestDto requestDto) {
         Long kakao_uid = authService.getKakaoUserInfo(token).getId();
-        ResponseEntity<? super CommentsResponseDto> response = commentService.patchComment(postId, commentId, kakao_uid, requestDto);
-        return response;
+        return commentService.patchComment(postId, commentId, kakao_uid, requestDto);
     }
 
     // 댓글 삭제
     @DeleteMapping("/posts/comments")
-    public ResponseEntity<? super DeleteCommentsResponseDto> deleteComment(@RequestParam("postId") Long postId, @RequestParam("commentId") Long commentId, @RequestHeader("Authorization") String token) {
+    public ResponseEntity<DeleteCommentsResponseDto> deleteComment(@RequestParam("postId") Long postId, @RequestParam("commentId") Long commentId, @RequestHeader("Authorization") String token) {
         Long kakao_uid = authService.getKakaoUserInfo(token).getId();
-        ResponseEntity<? super DeleteCommentsResponseDto> response = commentService.deleteComment(postId, commentId, kakao_uid);
-        return response;
+        return commentService.deleteComment(postId, commentId, kakao_uid);
     }
 }

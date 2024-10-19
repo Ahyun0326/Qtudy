@@ -41,7 +41,7 @@ public class CommentService {
     private final UserRepository userRepo;
 
     @Transactional
-    public ResponseEntity<? super CommentsResponseDto> saveComment(Long postId, Long kakaoId, CommentsRequestDto dto) {
+    public ResponseEntity<CommentsResponseDto> saveComment(Long postId, Long kakaoId, CommentsRequestDto dto) {
 
         Posts post = postRepo.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.NOT_EXISTED_POST));
         Users user = userRepo.findByKakaoId(kakaoId);
@@ -58,7 +58,7 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<? super GetCommentsAllResponseDto> getAllComment(Long postId, int page) {
+    public ResponseEntity<GetCommentsAllResponseDto> getAllComment(Long postId, int page) {
 
         Pageable pageable = PageRequest.of(page, 4, Sort.by("createdAt").descending());
         List<Comments> comments = commentRepo.findByPost_PostId(postId, pageable).getContent();
@@ -73,7 +73,7 @@ public class CommentService {
     }
 
     @Transactional
-    public ResponseEntity<? super CommentsResponseDto> patchComment(Long postId, Long commentId, Long kakaoId, CommentsRequestDto dto) {
+    public ResponseEntity<CommentsResponseDto> patchComment(Long postId, Long commentId, Long kakaoId, CommentsRequestDto dto) {
 
         Users user = userRepo.findByKakaoId(kakaoId);
         if (!postRepo.existsById(postId)) {
@@ -92,7 +92,7 @@ public class CommentService {
     }
 
     @Transactional
-    public ResponseEntity<? super DeleteCommentsResponseDto> deleteComment(Long postId, Long commentId, Long kakaoId) {
+    public ResponseEntity<DeleteCommentsResponseDto> deleteComment(Long postId, Long commentId, Long kakaoId) {
         if (userRepo.findByKakaoId(kakaoId) == null) {
             throw new UserException(UserErrorCode.NOT_EXISTED_USER);
         } else if (!postRepo.existsById(postId)) {
